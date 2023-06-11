@@ -9,6 +9,8 @@ import {
   Squares2X2Icon,
 } from "@heroicons/react/20/solid";
 
+import Tasks from "./components/Tasks";
+
 const defaultSortOptions = [
   { name: "Newest", href: "#", current: true },
   { name: "Oldest", href: "#", current: false },
@@ -20,9 +22,9 @@ const defaultFilters = [
     id: "Channel",
     name: "Channel",
     options: [
-      { value: "Channel1", label: "Channel1", checked: true },
-      { value: "Channel2", label: "Channel2", checked: true },
-      { value: "Channel3", label: "Channel3", checked: true },
+      { value: "1044848947497291826", label: "Biz General", checked: true },
+      { value: "967663391500013639", label: "BizDev Unyte", checked: true },
+      { value: "1080430945271824395", label: "UNCHAIN 進捗", checked: true },
       { value: "Channel4", label: "Channel4", checked: true },
       { value: "Channel5", label: "Channel5", checked: true },
       { value: "Channel6", label: "Channel6", checked: true },
@@ -240,7 +242,7 @@ const App = () => {
           </div>
 
           <section aria-labelledby="products-heading" className="pb-24 pt-6">
-            <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-8">
               {/* Filters */}
               <form className="hidden lg:block">
                 {chanelFilters.map((section) => (
@@ -253,6 +255,10 @@ const App = () => {
                       <>
                         <h3 className="-my-3 flow-root">
                           <Disclosure.Button className="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500">
+                            <FunnelIcon
+                              className="h-5 w-5"
+                              aria-hidden="true"
+                            />
                             <span className="font-medium text-gray-900">
                               {section.name}
                             </span>
@@ -303,7 +309,12 @@ const App = () => {
                 ))}
               </form>
 
-              <div className="lg:col-span-3 text-3xl">Hello World.</div>
+              <div className="lg:col-span-3">
+                <Tasks
+                  filters={chanelFilters[0].options}
+                  sortOptions={sortOptions}
+                />
+              </div>
             </div>
           </section>
         </main>
