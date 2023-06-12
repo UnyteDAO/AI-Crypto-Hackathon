@@ -9,7 +9,7 @@ import {
   Squares2X2Icon,
   MagnifyingGlassIcon,
   EnvelopeIcon,
-} from "@heroicons/react/20/solid";
+} from "@heroicons/react/24/outline";
 
 import Tasks from "./components/Tasks";
 
@@ -347,7 +347,7 @@ const App = () => {
                 ))}
               </form>
 
-              <div className="lg:col-span-3">
+              <div className="lg:col-span-7">
                 <Tasks
                   filters={chanelFilters[0].options}
                   sortOptions={sortOptions}

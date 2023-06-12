@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import TaskItem from "./TaskItem";
 import { getTasks } from "../modules/Notion.mjs";
 
 const Tasks = (props) => {
@@ -36,7 +37,10 @@ const Tasks = (props) => {
 
     const filteredData = taskData.filter((data) => {
       const isChannelChecked = props.filters.some(
-        (item) => data.channelId === item.value && item.checked && data.summary.toLowerCase().includes(props.searchText.toLowerCase())
+        (item) =>
+          data.channelId === item.value &&
+          item.checked &&
+          data.summary.toLowerCase().includes(props.searchText.toLowerCase())
       );
       return isChannelChecked;
     });
@@ -59,10 +63,26 @@ const Tasks = (props) => {
   }, [props, taskData]);
 
   return (
-    <div>
-      {displayData.length > 0 ? (
-        <pre>{JSON.stringify(displayData, null, 2)}</pre>
-      ) : null}
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
+      {[...displayData].map((data, index) => {
+        let tasks = [];
+        const regx = /- \[ \] (.+)\n?/g;
+        const matches = data.tasks.match(regx);
+        if (matches) {
+          for (const match of matches) {
+            tasks = [...tasks, match.replace("- [ ] ", "")];
+          }
+        }
+        return (
+          <TaskItem
+            key={`${data.channelId}-${data.date}-${index}`}
+            channel={data.channelId}
+            summary={data.summary}
+            tasks={tasks}
+            date={data.date}
+          />
+        );
+      })}
     </div>
   );
 };
