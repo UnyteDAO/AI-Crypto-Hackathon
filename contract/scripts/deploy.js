@@ -12,7 +12,17 @@ const main = async () => {
   // Minting が仮想マイナーにより、承認されるのを待ちます。
   await txn.wait();
   console.log("Minted NFT");
-  console.log("成功");
+  console.log("ミント成功");
+
+  // バッチでNFTをミントする
+  txn = await nftContract.mintBatch(
+    ["0xdC56956cD5441348c758519AFb66a10D86cbe7b2", "0x4C09EaeDb76fE46E44C69f5cE997faa7502e46F9"],
+    ["ipfs://QmUNfwH1Sh4K8nNSY3hJ2qTpbtqaUeJPVqr3K86yC5Decq", "ipfs://Qmb4B1WEdd3VQfEMSR9hSdM4xyJcGv4j9RhmeDUTpGAbEL"],
+    ["1", "2"]
+  );
+  // Minting が仮想マイナーにより、承認されるのを待ちます。
+  await txn.wait();
+  console.log("バッチミント成功");
 };
 // エラー処理を行っています。
 const runMain = async () => {
