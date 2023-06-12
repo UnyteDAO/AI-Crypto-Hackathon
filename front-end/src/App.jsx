@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
@@ -40,6 +40,18 @@ const App = () => {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [chanelFilters, setChanelFilters] = useState(defaultFilters);
   const [sortOptions, setSortOptions] = useState(defaultSortOptions);
+  const [needNextTasks, setNeedNextTasks] = useState(false);
+
+  useEffect(() => {
+    window.addEventListener("scroll", scrollHandler);
+    return () => window.removeEventListener("scroll", scrollHandler);
+  }, []);
+
+  const scrollHandler = () => {
+    window.innerHeight + window.scrollY >= document.body.offsetHeight
+      ? setNeedNextTasks(true)
+      : setNeedNextTasks(false);
+  };
 
   const sortHandler = (index) => {
     const result = sortOptions.map((option, optionIndex) => {
@@ -313,6 +325,7 @@ const App = () => {
                 <Tasks
                   filters={chanelFilters[0].options}
                   sortOptions={sortOptions}
+                  needNextTasks={needNextTasks}
                 />
               </div>
             </div>

@@ -4,41 +4,59 @@ import { getTasks } from "../modules/Notion.mjs";
 const Tasks = (props) => {
   const [taskData, setTaskData] = useState([]);
   const [displayData, setDisplayData] = useState([]);
+  const [nextCursor, setNextCursor] = useState("");
 
   useEffect(() => {
-    const init = async () => {
+    const initializeTaskData = async () => {
       const result = await getTasks();
-      setTaskData(result);
-      setDisplayData(result);
+      setTaskData(result.tasks);
+      setDisplayData(result.tasks);
+      setNextCursor(result.nextCursor);
+      console.log(result);
     };
-    init();
+    initializeTaskData();
   }, []);
 
   useEffect(() => {
-    console.log("Call props Change Effect");
-    const filteredData = taskData
-      .map((data) => {
-        const isChecked = props.filters.find(
-          (item) => data.channelId === item.value && item.checked
-        );
-        return isChecked ? data : null;
-      })
-      .filter(Boolean);
+    const getNextTasks = async () => {
+      const result = await getTasks(nextCursor);
+      setTaskData((prevTasks) => [...prevTasks, ...result.tasks]);
+      setDisplayData((prevTasks) => [...prevTasks, ...result.tasks]);
+      setNextCursor(result.nextCursor);
+      console.log(result);
+    };
 
+    if (props.needNextTasks && nextCursor) {
+      getNextTasks();
+    }
+  }, [props.needNextTasks]);
+
+  useEffect(() => {
+    //console.log("Call props change effect");
+
+    const filteredData = taskData.filter((data) => {
+      const isChannelChecked = props.filters.some(
+        (item) => data.channelId === item.value && item.checked
+      );
+      return isChannelChecked;
+    });
+
+    let sortedData;
     if (props.sortOptions[0].current) {
-      console.log("call Newest");
-      const results = filteredData.sort(
+      //console.log("Sort by newest");
+      sortedData = [...filteredData].sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       );
-      setDisplayData([...results]);
     } else if (props.sortOptions[1].current) {
-      console.log("call Oldest");
-      const results = filteredData.sort(
+      //console.log("Sort by oldest");
+      sortedData = [...filteredData].sort(
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
       );
-      setDisplayData([...results]);
+    } else {
+      sortedData = [...filteredData];
     }
-  }, [props]);
+    setDisplayData(sortedData);
+  }, [props, taskData]);
 
   return (
     <div>
