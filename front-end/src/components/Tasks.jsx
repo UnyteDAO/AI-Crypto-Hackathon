@@ -76,7 +76,9 @@ const Tasks = (props) => {
         return (
           <TaskItem
             key={`${data.channelId}-${data.date}-${index}`}
+            id={data.id}
             channel={data.channelId}
+            messageId={data.messageId}
             summary={data.summary}
             tasks={tasks}
             date={data.date}

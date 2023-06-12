@@ -1,8 +1,16 @@
-import { EnvelopeIcon, PhoneIcon,HandRaisedIcon,PlayIcon,TrophyIcon } from "@heroicons/react/24/outline";
+import {
+  EnvelopeIcon,
+  PhoneIcon,
+  HandRaisedIcon,
+  PlayIcon,
+  TrophyIcon,
+} from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 
 const defaultTaskItem = {
+  id: "",
   channel: "",
+  messageId: "",
   summary: "",
   tasks: [],
   date: "2023-06-02T10:00:00",
@@ -22,13 +30,31 @@ const TaskItem = (props) => {
           {taskItem.summary}
         </div>
         <div className="mt-4 text-sm font-medium text-gray-900 text-left">
-          {taskItem.tasks.map((task,index)=>{
+          {taskItem.tasks.map((task, index) => {
             return (
-            <div key={index}>
-              <input className="mr-2 mb-2" type="checkbox" name="tasks"/>
-              <label htmlFor="tasks">{task}</label>
-            </div>              
-            )
+              <div
+                className="relative flex items-start"
+                key={`taskitem-${taskItem.id}-dev-${index}`}
+              >
+                <div className="flex h-6 items-center">
+                  <input
+                    id={`taskitem-${taskItem.id}-checkbox-${index}`}
+                    aria-describedby="comments-description"
+                    name={`taskitem-${taskItem.id}-checkbox-${index}`}
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                  />
+                </div>
+                <div className="ml-3 text-sm leading-6">
+                  <label
+                    htmlFor={`taskitem-${taskItem.id}-checkbox-${index}`}
+                    className="font-medium text-gray-900"
+                  >
+                    {task}
+                  </label>{" "}
+                </div>
+              </div>
+            );
           })}
         </div>
       </div>
@@ -70,7 +96,10 @@ const TaskItem = (props) => {
               href="#"
               className="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900"
             >
-              <TrophyIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+              <TrophyIcon
+                className="h-5 w-5 text-gray-400"
+                aria-hidden="true"
+              />
               ありがとう！
             </a>
           </div>
