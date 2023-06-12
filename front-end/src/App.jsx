@@ -251,22 +251,22 @@ const App = () => {
               </button> */}
 
               <div className="relative mt-2 ml-3 w-auto rounded-md shadow-sm">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <MagnifyingGlassIcon
-                      className="h-5 w-5 text-gray-400"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <input
-                    size="40"
-                    type="text"
-                    name="searchText"
-                    id="searchText"
-                    className="block w-full rounded-md border-0 py-1.5 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    placeholder="検索"
-                    onChange={searchHandler}
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <MagnifyingGlassIcon
+                    className="h-5 w-5 text-gray-400"
+                    aria-hidden="true"
                   />
                 </div>
+                <input
+                  size="40"
+                  type="text"
+                  name="searchText"
+                  id="searchText"
+                  className="block w-full rounded-md border-0 py-1.5 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  placeholder="検索"
+                  onChange={searchHandler}
+                />
+              </div>
 
               <button
                 type="button"

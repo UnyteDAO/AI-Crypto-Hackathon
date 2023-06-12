@@ -1,9 +1,8 @@
 import {
-  EnvelopeIcon,
-  PhoneIcon,
   HandRaisedIcon,
   PlayIcon,
   TrophyIcon,
+  PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 
@@ -25,10 +24,16 @@ const TaskItem = (props) => {
 
   return (
     <div className="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
-      <div className="flex flex-1 flex-col p-6">
-        <div className="mt-2 text-sm font-medium text-gray-900 text-left">
-          {taskItem.summary}
+      <div className="flex flex-1 flex-col p-4">
+        <div className="flex justify-between">
+          <div className="sr-only">Channel</div>
+          <div className="flex text-sm text-gray-500">{taskItem.channel}</div>
+          <div className="sr-only">Date</div>
+          <div className="flex text-sm text-gray-500">
+            {new Date(taskItem.date).toLocaleString()}
+          </div>
         </div>
+
         <div className="mt-4 text-sm font-medium text-gray-900 text-left">
           {taskItem.tasks.map((task, index) => {
             return (
@@ -57,17 +62,12 @@ const TaskItem = (props) => {
             );
           })}
         </div>
-      </div>
-      <div className=" divide-y divide-none p-1">
-        <div className="sr-only">Channel</div>
-        <div className="flex text-sm text-gray-500 items-end justify-end">
-          {taskItem.channel}
-        </div>
-        <div className="sr-only">Date</div>
-        <div className="flex text-sm text-gray-500 items-end justify-end">
-          {new Date(taskItem.date).toLocaleString()}
+
+        <div className="mt-4 text-xs font-medium text-gray-900 text-left">
+          {taskItem.summary}
         </div>
       </div>
+
       <div>
         <div className="-mt-px flex divide-x divide-gray-200">
           <div className="flex w-0 flex-1">
