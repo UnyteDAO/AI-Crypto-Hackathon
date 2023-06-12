@@ -7,6 +7,8 @@ import {
   MinusIcon,
   PlusIcon,
   Squares2X2Icon,
+  MagnifyingGlassIcon,
+  EnvelopeIcon,
 } from "@heroicons/react/20/solid";
 
 import Tasks from "./components/Tasks";
@@ -40,6 +42,7 @@ const App = () => {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [chanelFilters, setChanelFilters] = useState(defaultFilters);
   const [sortOptions, setSortOptions] = useState(defaultSortOptions);
+  const [searchText, setSearchText] = useState("");
   const [needNextTasks, setNeedNextTasks] = useState(false);
 
   useEffect(() => {
@@ -65,6 +68,10 @@ const App = () => {
     const result = [...chanelFilters];
     result[0].options[index].checked = !result[0].options[index].checked;
     setChanelFilters(result);
+  };
+
+  const searchHandler = (event) => {
+    setSearchText(event.target.value);
   };
 
   return (
@@ -235,13 +242,32 @@ const App = () => {
                 </Transition>
               </Menu>
 
-              <button
+              {/* <button
                 type="button"
                 className="-m-2 ml-5 p-2 text-gray-400 hover:text-gray-500 sm:ml-7"
               >
                 <span className="sr-only">View grid</span>
                 <Squares2X2Icon className="h-5 w-5" aria-hidden="true" />
-              </button>
+              </button> */}
+
+              <div className="relative mt-2 ml-3 w-auto rounded-md shadow-sm">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <MagnifyingGlassIcon
+                      className="h-5 w-5 text-gray-400"
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <input
+                    size="40"
+                    type="text"
+                    name="searchText"
+                    id="searchText"
+                    className="block w-full rounded-md border-0 py-1.5 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    placeholder="検索"
+                    onChange={searchHandler}
+                  />
+                </div>
+
               <button
                 type="button"
                 className="-m-2 ml-4 p-2 text-gray-400 hover:text-gray-500 sm:ml-6 lg:hidden"
@@ -326,6 +352,7 @@ const App = () => {
                   filters={chanelFilters[0].options}
                   sortOptions={sortOptions}
                   needNextTasks={needNextTasks}
+                  searchText={searchText}
                 />
               </div>
             </div>

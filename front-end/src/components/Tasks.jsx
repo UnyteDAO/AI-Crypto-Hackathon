@@ -36,7 +36,7 @@ const Tasks = (props) => {
 
     const filteredData = taskData.filter((data) => {
       const isChannelChecked = props.filters.some(
-        (item) => data.channelId === item.value && item.checked
+        (item) => data.channelId === item.value && item.checked && data.summary.toLowerCase().includes(props.searchText.toLowerCase())
       );
       return isChannelChecked;
     });
