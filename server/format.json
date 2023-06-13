@@ -1,0 +1,68 @@
+{
+  "status": "doing",
+  "tasks": [
+    {
+      "team": {
+        "name": "Super Team",
+        "id": "1234",
+        "avatarID": "5678"
+      },
+      "recipient": {
+        "walletAddress": [
+          "0x123456789abcdef0123456789abcdef012345678"
+        ]
+      },
+      "requester": {
+        "name": "Taro Yamada",
+        "id": "9876",
+        "avatarID": "4321"
+      },
+      "task": {
+        "name": "JSON file creation",
+        "id": "8765"
+      }
+    },
+    {
+      "team": {
+        "name": "Awesome Team",
+        "id": "2345",
+        "avatarID": "6789"
+      },
+      "recipient": {
+        "walletAddress": [
+          "0xabcdef0123456789abcdef0123456789abcdef01"
+        ]
+      },
+      "requester": {
+        "name": "Hanako Yamada",
+        "id": "8765",
+        "avatarID": "5432"
+      },
+      "task": {
+        "name": "JSON file validation",
+        "id": "7654"
+      }
+    },
+    {
+      "team": {
+        "name": "Cool Team",
+        "id": "3456",
+        "avatarID": "7890"
+      },
+      "recipient": {
+        "walletAddress": [
+          "0x0123456789abcdef0123456789abcdef01234567"
+        ]
+      },
+      "requester": {
+        "name": "Jiro Yamada",
+        "id": 7654,
+        "avatarID": "6543"
+      },
+      "task": {
+        "name": "JSON file upload",
+        "id": "6543"
+      }
+    }
+  ]
+}
