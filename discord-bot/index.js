@@ -1,4 +1,5 @@
 const axios = require("axios");
+const crypto = require("crypto");
 require("dotenv").config();
 // discord.jsライブラリの中から必要な設定を呼び出し、変数に保存します
 // discord botの初期化
@@ -49,10 +50,11 @@ client.once(Events.ClientReady, (c) => {
     console.log("notionに書き込むメッセージID：", oldestMessageId);
     console.log("チャンネルID：", message.channel.id);
     console.log("ギルドID：", message.guild.id);
+    await sendToNotion(cleanMessage, oldestMessageId);
   });
 });
 
-const sendToNotion = async (message, oldestMessageId) => {
+const sendToNotion = async (message, oldestMessageId, history) => {
   const options = {
     method: "POST",
     url: "https://api.notion.com/v1/pages",
@@ -71,16 +73,43 @@ const sendToNotion = async (message, oldestMessageId) => {
           title: [
             {
               text: {
-                content: "ほげ",
+                content: crypto.randomUUID(),
               },
             },
           ],
         },
-        AuthorName: {
+        GuildId: {
           rich_text: [
             {
               text: {
-                content: "A dark green leafy vegetable",
+                content: message.guild.id,
+              },
+            },
+          ],
+        },
+        ChannelId: {
+          rich_text: [
+            {
+              text: {
+                content: message.channel.id,
+              },
+            },
+          ],
+        },
+        LastMessageId: {
+          rich_text: [
+            {
+              text: {
+                content: oldestMessageId,
+              },
+            },
+          ],
+        },
+        History: {
+          rich_text: [
+            {
+              text: {
+                content: history,
               },
             },
           ],
@@ -88,14 +117,14 @@ const sendToNotion = async (message, oldestMessageId) => {
       },
     },
   };
-  axios
-    .request(options)
-    .then(function (response) {
-      console.log(response.data);
-    })
-    .catch(function (error) {
-      console.error(error);
-    });
+  try {
+    const response = await axios.request(options);
+    console.log("T");
+    console.log(response.data);
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 };
 
 // ログインします
