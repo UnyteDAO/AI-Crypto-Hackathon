@@ -25,7 +25,7 @@ const client = new Client({
 
 // クライアントオブジェクトが準備OKとなったとき一度だけ実行されます
 client.once(Events.ClientReady, (c) => {
-  console.log(`準備OKです! ${c.user.tag}がログインします。`);
+  console.log(`I'm listening on... (${c.user.tag} is logged in.)`);
 
   // メッセージが送信されたときに実行されます
   client.on(Events.MessageCreate, async (message) => {
@@ -46,15 +46,18 @@ client.once(Events.ClientReady, (c) => {
       }
     };
     const history = await createMessageHistory(message);
-    console.log(history);
-    console.log("notionに書き込むメッセージID：", oldestMessageId);
-    console.log("チャンネルID：", message.channel.id);
-    console.log("ギルドID：", message.guild.id);
-    await sendToNotion(cleanMessage, oldestMessageId);
+    await sendToNotion(message, oldestMessageId, history);
   });
 });
 
 const sendToNotion = async (message, oldestMessageId, history) => {
+  let newHistory = history;
+  const formattedArr = newHistory.map((item) => {
+    const [key, value] = item.split(": ");
+    return `\`${key}\`: \`${value}\`\n-----`;
+  });
+  newHistory = formattedArr.join("\n");
+
   const options = {
     method: "POST",
     url: "https://api.notion.com/v1/pages",
@@ -109,7 +112,25 @@ const sendToNotion = async (message, oldestMessageId, history) => {
           rich_text: [
             {
               text: {
-                content: history,
+                content: newHistory,
+              },
+            },
+          ],
+        },
+        RawHistory: {
+          rich_text: [
+            {
+              text: {
+                content: JSON.stringify(history),
+              },
+            },
+          ],
+        },
+        CreatedAt: {
+          rich_text: [
+            {
+              text: {
+                content: JSON.stringify(Date.now()),
               },
             },
           ],
@@ -120,7 +141,6 @@ const sendToNotion = async (message, oldestMessageId, history) => {
   try {
     const response = await axios.request(options);
     console.log("T");
-    console.log(response.data);
   } catch (error) {
     console.error(error);
     return null;
