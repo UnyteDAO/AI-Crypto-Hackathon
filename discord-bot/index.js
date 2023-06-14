@@ -135,6 +135,20 @@ const sendToNotion = async (message, oldestMessageId, history) => {
             },
           ],
         },
+        UserIds: {
+          multi_select: [
+            {
+              text: {
+                content: "test",
+              },
+            },
+            {
+              text: {
+                content: "test2",
+              },
+            },
+          ],
+        },
       },
     },
   };
