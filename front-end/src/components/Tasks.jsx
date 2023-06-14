@@ -77,6 +77,7 @@ const Tasks = (props) => {
           <TaskItem
             key={`${data.channelId}-${data.date}-${index}`}
             id={data.id}
+            guildId={data.guildId}
             channel={data.channelId}
             messageId={data.messageId}
             summary={data.summary}

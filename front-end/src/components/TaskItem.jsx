@@ -15,6 +15,7 @@ import {
 
 const defaultTaskItem = {
   id: "",
+  guildId: "",
   channel: "",
   messageId: "",
   summary: "",
@@ -33,6 +34,7 @@ const TaskItem = (props) => {
     context: "",
     isShow: false,
   });
+  const [isInProcess, setIsInProcess] = useState(false);
 
   useEffect(() => {
     setTaskItem((prev) => ({ ...prev, ...props }));
@@ -43,17 +45,19 @@ const TaskItem = (props) => {
     const results = [...checkedList];
     results[index] = !results[index];
     setCheckedList(results);
-    //console.log(taskItem.id,address,results)
   };
 
   const assignHandler = async (event) => {
     event.preventDefault();
     if (!isConnected) {
-      console.error("Required wallet connect.");
+      showRequestConnectWallet();
       return;
     }
+
     try {
+      setIsInProcess(true);
       await addAssign(address, taskItem, checkedList);
+      setIsInProcess(false);
       setNotification({
         header: "登録が完了しました。",
         context:
@@ -75,12 +79,51 @@ const TaskItem = (props) => {
 
   const mintAssignTokenHandler = async (event) => {
     event.preventDefault();
-    await mintAssignToken(address, taskItem, checkedList);
+    if (!isConnected) {
+      showRequestConnectWallet();
+      return;
+    }
+
+    try {
+      setIsInProcess(true);
+      await mintAssignToken(address, taskItem);
+      setIsInProcess(false);
+      setNotification({
+        header: "Mintが完了しました。",
+        context:
+          "後ほどアサイントークンが発行されます。活動へのご協力ありがとうございます。",
+        isShow: true,
+        isSuccess: true,
+        callback: setNotification,
+      });
+    } catch (error) {
+      setNotification({
+        header: "Mintに失敗しました。",
+        context: error.message,
+        isShow: true,
+        isSuccess: false,
+        callback: setNotification,
+      });
+    }
   };
 
   const mintCompletionTokenHandler = async (event) => {
     event.preventDefault();
+    if (!isConnected) {
+      showRequestConnectWallet();
+      return;
+    }
     await mintCompletionToken(address, taskItem, checkedList);
+  };
+
+  const showRequestConnectWallet = () => {
+    setNotification({
+      header: "ウォレットの接続が必要です。",
+      context: "右上の [ Connect Wallet ] から接続してください。",
+      isShow: true,
+      isSuccess: false,
+      callback: setNotification,
+    });
   };
 
   return (
@@ -90,6 +133,7 @@ const TaskItem = (props) => {
         <div className="flex justify-between">
           <div className="sr-only">Channel</div>
           <div className="flex text-sm text-gray-500">{taskItem.channel}</div>
+          <div className="flex text-sm text-gray-500">{taskItem.guildId}</div>
           <div className="sr-only">Date</div>
           <div className="flex text-sm text-gray-500">
             {new Date(taskItem.date).toLocaleString()}
@@ -133,10 +177,14 @@ const TaskItem = (props) => {
 
       <div>
         <div
-          className="relative hidden justify-center h-0 p-2"
+          className={
+            isInProcess
+              ? "relative flex justify-center h-0 top-3"
+              : "relative hidden justify-center h-0 top-3"
+          }
           aria-label="読み込み中"
         >
-          <div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+          <div className="animate-spin h-8 w-8 border-4 border-blue-400 rounded-full border-t-transparent"></div>
         </div>
 
         <div className="-mt-px flex divide-x divide-gray-200">

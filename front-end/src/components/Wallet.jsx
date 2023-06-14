@@ -56,7 +56,6 @@ const Wallet = (props) => {
       <RainbowKitProvider
         modalSize="compact"
         chains={chains}
-        //avatar={() => CustomAvatar({currentUser})}
       >
         <ConnectButton
           showBalance={false}

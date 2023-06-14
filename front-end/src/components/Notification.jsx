@@ -20,7 +20,7 @@ const Notification = (props) => {
           header: "",
           context: "",
           isShow: false,
-          isSuccess: true,
+          isSuccess: props.isSuccess,
           callback: null,
         });  
       }, 5000)  
