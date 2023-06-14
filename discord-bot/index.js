@@ -32,7 +32,13 @@ client.once(Events.ClientReady, (c) => {
     const maxHistoryNumber = 20;
     let cleanMessage = `${message.author.username}: ${message.cleanContent}`;
     let oldestMessageId = "";
+    let userIds = [];
+    userIds.push(message.author.id);
+
     const createMessageHistory = async (message, prevMessages = []) => {
+      userIds.some((userId) => userId === message.author.id)
+        ? null
+        : userIds.push(message.author.id);
       cleanMessage = `${message.author.username}: ${message.cleanContent}`;
       const messages = [cleanMessage, ...prevMessages];
       if (message.reference && messages.length < maxHistoryNumber) {
@@ -45,16 +51,20 @@ client.once(Events.ClientReady, (c) => {
         return messages;
       }
     };
+
     const history = await createMessageHistory(message);
-    await sendToNotion(message, oldestMessageId, history);
+    userIds = userIds.map((userId) => ({ name: userId }));
+    await sendToNotion(message, oldestMessageId, history, userIds);
   });
 });
 
-const sendToNotion = async (message, oldestMessageId, history) => {
+const sendToNotion = async (message, oldestMessageId, history, userIds) => {
   let newHistory = history;
-  const formattedArr = newHistory.map((item) => {
+  const formattedArr = newHistory.map((item, index, array) => {
     const [key, value] = item.split(": ");
-    return `\`${key}\`: \`${value}\`\n-----`;
+    return index < array.length - 1
+      ? `\`${key}\`: \`${value}\`\n-----`
+      : `\`${key}\`: \`${value}\``;
   });
   newHistory = formattedArr.join("\n");
 
@@ -108,6 +118,15 @@ const sendToNotion = async (message, oldestMessageId, history) => {
             },
           ],
         },
+        LastMessageCreatedAt: {
+          rich_text: [
+            {
+              text: {
+                content: JSON.stringify(message.createdTimestamp),
+              },
+            },
+          ],
+        },
         History: {
           rich_text: [
             {
@@ -136,18 +155,7 @@ const sendToNotion = async (message, oldestMessageId, history) => {
           ],
         },
         UserIds: {
-          multi_select: [
-            {
-              text: {
-                content: "test",
-              },
-            },
-            {
-              text: {
-                content: "test2",
-              },
-            },
-          ],
+          multi_select: userIds,
         },
       },
     },
