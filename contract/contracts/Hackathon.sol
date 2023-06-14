@@ -21,7 +21,8 @@ contract Hackathon is ERC1155URIStorage {
     function mint(
         address _owner,
         string memory _ipfsLink,
-        string memory _taskId
+        string memory _taskId,
+        string memory _type
     ) public {
         // オーナーのみが発行できるようにする
         require(msg.sender == owner, "Only owner can mint");
@@ -36,7 +37,8 @@ contract Hackathon is ERC1155URIStorage {
                     abi.encodePacked(
                         '{"attributes":[{"display_type":"number","trait_type":"id","value":',
                         _taskId,
-                        '}, {"trait_type":"Project","value":"test',
+                        '}, {"trait_type":"Type","value":"',
+                        _type,
                         '"}], "name":"test',
                         '","symbol":"test',
                         '","description":"NFTs attesting to their contribution in the DAOs recorded by Unyte. With Unyte, members can easily record proposals, contributions and praise comments using slash commands. We can also send ERC20 tokens, NFT or WL depending on what is being recorded. More info: https://unyte.team/","image": "',
@@ -64,23 +66,17 @@ contract Hackathon is ERC1155URIStorage {
 
     // トークンのバッチでのミントを行う関数を以下に実装する
     function mintBatch(
-        address[] memory _owner,
-        string[] memory _ipfsLinks,
-        string[] memory _taskIds
+        address[] memory _owners,
+        string memory _ipfsLink,
+        string memory _taskId,
+        string memory _type
     ) public {
         // オーナーのみが発行できるようにする
         require(msg.sender == owner, "Only owner can mint");
 
-        // それぞれの引数の要素数が同じであることを確認する
-        require(
-            _owner.length == _ipfsLinks.length &&
-                _ipfsLinks.length == _taskIds.length,
-            "All arrays must have the same length"
-        );
-
         // lengthの数だけmintを繰り返す
-        for (uint256 i = 0; i < _owner.length; i++) {
-            mint(_owner[i], _ipfsLinks[i], _taskIds[i]);
+        for (uint256 i = 0; i < _owners.length; i++) {
+            mint(_owners[i], _ipfsLink, _taskId, _type);
         }
     }
 }
