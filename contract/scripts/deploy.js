@@ -23,7 +23,10 @@ const main = async () => {
     ["Unyte", "Unyte"]
   );
   // Minting が仮想マイナーにより、承認されるのを待ちます。
-  await txn.wait();
+  console.log(txn)
+  console.log("✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨")
+  let receipt = await txn.wait();
+  console.log(receipt);
   console.log("バッチミント成功");
 };
 // エラー処理を行っています。
