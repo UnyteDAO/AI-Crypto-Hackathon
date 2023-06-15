@@ -1,0 +1,15 @@
+{
+  "name": "notionfetch",
+  "version": "1.0.0",
+  "description": "",
+  "main": "fetchNotion.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@notionhq/client": "^2.2.5",
+    "openai": "^3.3.0"
+  }
+}
