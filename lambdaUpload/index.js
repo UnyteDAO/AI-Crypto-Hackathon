@@ -66,7 +66,6 @@ exports.handler = async function (event, context) {
 		return(`/tmp/${userid}.png`);
 	};
 
-	// const event = {"body": {"status": "done","tasks": [{"team": {"name": "Super Team","id": "1234","avatarURL": "hoge"},"recipient": {"walletAddress":["0xdC56956cD5441348c758519AFb66a10D86cbe7b2"]},"requester": {"name":"Taro Yamada","id": "9876","avatarURL": "hoge"},"task": {"name": "JSON file creation","id": "8765"}}]}}
     console.log(event)
     const data = JSON.parse(event.body)
 	// const data = event.body
@@ -80,9 +79,9 @@ exports.handler = async function (event, context) {
 
     for (let index = 0; index < tasks.length; index++) {
         const task = tasks[index];
-        const recipient = task.recipient
+        const walletAddress = task.walletAddress
         const taskContent = task.task
-        console.log(recipient,taskContent)
+        console.log(walletAddress,taskContent)
 		console.log(taskContent.name)
 
 		const path = await createNFTImage(requester.id, taskContent.name, "https://pbs.twimg.com/media/FyjEYVzacAEJwqD?format=jpg", "https://media.discordapp.net/attachments/1116624090241974364/1118224028734345266/20230613_NFT_A1.jpg", "https://pbs.twimg.com/media/FyjEYVzacAEJwqD?format=jpg", "white");
@@ -118,7 +117,7 @@ exports.handler = async function (event, context) {
 
         // タスク毎にNFTをmintする
         const result = await connectedContract.mintBatch(
-            recipient.walletAddress,
+            walletAddress,
             `ipfs://${hash}`,
             taskContent.id,
             data.status

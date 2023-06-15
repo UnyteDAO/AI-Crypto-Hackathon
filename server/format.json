@@ -1,48 +1,42 @@
 {
-	"status": "doing",
-	"team": {
-		"name": "Super Team",
-		"id": "1234",
-		"avatarID": "5678"
-	},
-	"requester": {
-		"name": "Taro Yamada",
-		"id": "9876",
-		"avatarID": "4321"
-	},
-	"tasks": [
-		{
-			"recipient": {
-				"walletAddress": [
-					"0x123456789abcdef0123456789abcdef012345678"
-				]
-			},
-			"task": {
-				"name": "JSON file creation",
-				"id": "8765"
-			}
-		},
-		{
-			"recipient": {
-				"walletAddress": [
-					"0xabcdef0123456789abcdef0123456789abcdef01"
-				]
-			},
-			"task": {
-				"name": "JSON file validation",
-				"id": "7654"
-			}
-		},
-		{
-			"recipient": {
-				"walletAddress": [
-					"0x0123456789abcdef0123456789abcdef01234567"
-				]
-			},
-			"task": {
-				"name": "JSON file upload",
-				"id": "6543"
-			}
-		}
-	]
+  "status": "doing",
+  "team": {
+    "name": "Super Team",
+    "id": "1234",
+    "avatarURL": "5678"
+  },
+  "requester": {
+    "name": "Taro Yamada",
+    "id": "9876",
+    "avatarURL": "4321"
+  },
+  "tasks": [
+    {
+      "walletAddress": [
+        "0x123456789abcdef0123456789abcdef012345678"
+      ],
+      "task": {
+        "name": "JSON file creation",
+        "id": "8765"
+      }
+    },
+    {
+      "walletAddress": [
+        "0x123456789abcdef0123456789abcdef012345678"
+      ],
+      "task": {
+        "name": "JSON file creation",
+        "id": "8765"
+      }
+    },
+    {
+      "walletAddress": [
+        "0x123456789abcdef0123456789abcdef012345678"
+      ],
+      "task": {
+        "name": "JSON file creation",
+        "id": "8765"
+      }
+    }
+  ]
 }
