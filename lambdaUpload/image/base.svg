@@ -1,8 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1500" viewBox="0 0 1500 1500">
   <image href="$base-image$" width="1500" height="1500"/>
   <!-- <image href="$icon$" x="330" y="844" width="2" height="2" transform="rotate(340,430,944)"/> -->
-  <image href="$border-image$" width="150" height="150"/>
-  
+  <!-- <image href="$border-image$" width="150" height="150"/> -->
+
+  <image x="0" y="1320" href="https://i.imgur.com/JRZ8qLa.png" width="240" height="240"/>
   <text x="265" y="1275" font-size="$font-size$" stroke-width="1" stroke="#ffffff" fill="$text-color$">$username$</text>
   <text x="265" y="1275" font-size="$font-size$" fill="$text-color$">$username$</text>
 </svg>

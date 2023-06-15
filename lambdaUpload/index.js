@@ -5,7 +5,7 @@ exports.handler = async function (event, context) {
 	const pinataSDK = require('@pinata/sdk');
 	const pinata = new pinataSDK({ pinataJWTKey: process.env.PINATA_JWT_KEY});
 
-	const createNFTImage = async (userid, username, icon, baseImage, borderImage, textColor) => {
+	const createNFTImage = async (userid, username, type ,icon, borderImage, textColor) => {
 		const fs = require("fs");
 		const fetch = require("node-fetch");
 		const { Resvg } = require("@resvg/resvg-js");
@@ -20,6 +20,13 @@ exports.handler = async function (event, context) {
 				break;
 			}
 		};
+
+		let baseImage = "";
+		if (type == "doing") {
+			baseImage = "https://media.discordapp.net/attachments/1116624090241974364/1118535456758452224/20230614_NFT_A1.jpg";
+		} else if (type == "done") {
+			baseImage = "https://media.discordapp.net/attachments/1116624090241974364/1118535457131724880/20230614_NFT_A2.jpg";
+		}
 
 		let svg = base.replaceAll("$username$", username);
 		svg = svg.replaceAll("$base-image$", baseImage);
@@ -84,15 +91,10 @@ exports.handler = async function (event, context) {
         console.log(walletAddress,taskContent)
 		console.log(taskContent.name)
 
-		const path = await createNFTImage(requester.id, taskContent.name, "https://pbs.twimg.com/media/FyjEYVzacAEJwqD?format=jpg", "https://media.discordapp.net/attachments/1116624090241974364/1118224028734345266/20230613_NFT_A1.jpg", "https://pbs.twimg.com/media/FyjEYVzacAEJwqD?format=jpg", "white");
+		const path = await createNFTImage(requester.id, taskContent.name, status, "https://pbs.twimg.com/media/FyjEYVzacAEJwqD?format=jpg", "https://pbs.twimg.com/media/FyjEYVzacAEJwqD?format=jpg", "white");
 
 		// データをipfsにアップロード
 		let hash = "";
-		// const options = {
-		// 	pinataMetadata: {
-		// 		name: `${taskContent.name}`
-		// 	},
-		// };
 		await pinata.pinFromFS(path).then((result) => {
 			//handle results here
 			console.log(result);
