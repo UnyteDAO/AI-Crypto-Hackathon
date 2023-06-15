@@ -12,10 +12,11 @@
   "dependencies": {
     "@headlessui/react": "^1.7.15",
     "@heroicons/react": "^2.0.18",
-    "@rainbow-me/rainbowkit": "^1.0.1",
+    "@rainbow-me/rainbowkit": "^1.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "wagmi": "^1.0.9"
+    "viem": "^1.0.7",
+    "wagmi": "1.2"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.3",

@@ -1,4 +1,3 @@
-import { UsersIcon } from "@heroicons/react/24/outline";
 
 const getTasks = async (nextCursor = "") => {
   try {
@@ -20,7 +19,18 @@ const getTasks = async (nextCursor = "") => {
       const channelId = item.properties.channelId.rich_text[0].plain_text;
       const messageId = item.properties.id.title[0].plain_text;
       const summary = item.properties.summary.rich_text[0].plain_text;
-      const tasks = item.properties.tasks.rich_text[0].plain_text;
+      let tasks = [];
+      const regx = /- \[ \] (.+)\n?/g;
+      const matches = item.properties.tasks.rich_text[0].plain_text.match(regx);
+      if (matches) {
+        for (const match of matches) {
+          tasks = [
+            ...tasks,
+            { name: match.replace("- [ ] ", ""), checked: false },
+          ];
+        }
+      }
+
       const date = item.properties.date.date.start;
       return { id, guildId, channelId, messageId, date, summary, tasks };
     });
@@ -101,14 +111,18 @@ const getUsers = async (address = "") => {
   }
 };
 
-const addAssign = async (address, taskItem, checkedList) => {
+const addAssign = async (address, taskItem) => {
   try {
     if (!address) throw new Error("Require wallet connected.");
+
+    const indexes = taskItem.tasks.map((task) => {
+      return task.checked;
+    });
 
     const requestData = {
       id: taskItem.id,
       address: address,
-      indexes: checkedList,
+      indexes: indexes,
     };
 
     console.log(requestData);
@@ -135,11 +149,10 @@ const addAssign = async (address, taskItem, checkedList) => {
   }
 };
 
-const getAssign = async (id) => {
+const getAssign = async (address) => {
   try {
-    if (!id) throw new Error("Require id");
     const response = await fetch(
-      `https://notionmanager.ukishima.repl.co/user?address=${address}`,
+      `https://notionmanager.ukishima.repl.co/getAssign?address=${address}`,
       {
         method: "GET",
         compress: true,
@@ -153,7 +166,7 @@ const getAssign = async (id) => {
     const responseJson = await response.json();
 
     const results = responseJson.results.map((item) => {
-      const id = item.id;
+      const id = item.properties.id.title[0].plain_text;
       const address = item.properties.assignUserAddress.rich_text[0].plain_text;
       const taskIndexes = item.properties.tasksIndexies.multi_select.map(
         (taskIndex) => {
@@ -206,7 +219,7 @@ const mintAssignToken = async (address, taskItem) => {
       tasks = [
         ...tasks,
         {
-          recipient: { walletAddress: address },
+          walletAddress: address,
           task: { name: "", id: `${taskItem.id}-${index}` },
         },
       ];
@@ -215,39 +228,121 @@ const mintAssignToken = async (address, taskItem) => {
     const usersInfo = await getUsers(address);
     const guildsInfo = await getGuilds(taskItem.guildId);
 
-    const results = {
+    const requestData = {
       status: "doing",
       team: {
         name: guildsInfo.guilds[0].guildName,
         id: guildsInfo.guilds[0].guildId,
-        avatarID: guildsInfo.guilds[0].iconUrl,
+        avatarURL: guildsInfo.guilds[0].iconUrl,
       },
       requester: {
         name: usersInfo.users[0].userName,
         id: usersInfo.users[0].userId,
-        avatarID: usersInfo.users[0].iconUrl,
+        avatarURL: usersInfo.users[0].iconUrl,
       },
       tasks: tasks,
     };
 
-    console.log(results);
+    console.log(requestData);
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestData),
+    };
+    const mintResponse = await fetch(
+      "https://a5guh723j5wcy2ns7vopdfjcu40qukfn.lambda-url.ap-northeast-1.on.aws/",
+      options
+    );
 
-    return results;
+    const mintResponseJson = await mintResponse.json();
+
+    return mintResponseJson;
   } catch (error) {
     console.error(error.message);
+    return { status: "error", message: error.message };
   }
 };
 
-const mintCompletionToken = async (address, taskItem, checkedList) => {
+const mintCompletionToken = async (address, taskItem) => {
   try {
-    if (!address) throw new Error("Require wallet connected.");
-    console.log(`Mint completion token ${taskItem.id} by ${address}`);
+    if (!taskItem) throw new Error("Require taskItem");
+    const response = await fetch(
+      `https://notionmanager.ukishima.repl.co/getAssign?id=${taskItem.id}`,
+      {
+        method: "GET",
+        compress: true,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const responseJson = await response.json();
+
+    const recievers = {};
+    responseJson.results.map((item) => {
+      const address = item.properties.assignUserAddress.rich_text[0].plain_text;
+      for (const taskIndex of item.properties.tasksIndexies.multi_select) {
+        recievers[taskIndex.name] = [
+          ...(recievers[taskIndex.name] ?? []),
+          address,
+        ];
+      }
+    });
+
+    let tasks = [];
+    for (const [index, address] of Object.entries(recievers)) {
+      tasks = [
+        ...tasks,
+        {
+          walletAddress: address,
+          task: { name: "", id: `${taskItem.id}-${index}` },
+        },
+      ];
+    }
+
+    const usersInfo = await getUsers(address);
+    const guildsInfo = await getGuilds(taskItem.guildId);
+
+    const requestData = {
+      status: "done",
+      team: {
+        name: guildsInfo.guilds[0].guildName,
+        id: guildsInfo.guilds[0].guildId,
+        avatarURL: guildsInfo.guilds[0].iconUrl,
+      },
+      requester: {
+        name: usersInfo.users[0].userName,
+        id: usersInfo.users[0].userId,
+        avatarURL: usersInfo.users[0].iconUrl,
+      },
+      tasks: tasks,
+    };
+
+    console.log(requestData);
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestData),
+    };
+    const mintResponse = await fetch(
+      "https://a5guh723j5wcy2ns7vopdfjcu40qukfn.lambda-url.ap-northeast-1.on.aws/",
+      options
+    );
+
+    const mintResponseJson = await mintResponse.json();
+
+    return mintResponseJson;
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
+    return { status: "error", message: error.message };
   }
 };
-
-//mintAssignToken("3cc1ab2f-a6eb-421d-ac29-b4015dc48b7a","0xd868A066FC7501FE3f7C93067B0D52DB493076Fb","945194711973498920");
 
 export {
   getTasks,

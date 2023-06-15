@@ -26,9 +26,8 @@ const defaultTaskItem = {
 import Notification from "./Notification";
 
 const TaskItem = (props) => {
-  const [taskItem, setTaskItem] = useState(defaultTaskItem);
   const { address, isConnected } = useAccount();
-  const [checkedList, setCheckedList] = useState([]);
+  const [taskItem, setTaskItem] = useState(defaultTaskItem);
   const [notification, setNotification] = useState({
     header: "",
     context: "",
@@ -38,13 +37,12 @@ const TaskItem = (props) => {
 
   useEffect(() => {
     setTaskItem((prev) => ({ ...prev, ...props }));
-    setCheckedList(Array(props.tasks.length));
   }, []);
 
   const checkHandler = (index) => {
-    const results = [...checkedList];
-    results[index] = !results[index];
-    setCheckedList(results);
+    const results = {...taskItem};
+    results.tasks[index].checked = !results.tasks[index].checked;
+    setTaskItem(results);
   };
 
   const assignHandler = async (event) => {
@@ -56,7 +54,7 @@ const TaskItem = (props) => {
 
     try {
       setIsInProcess(true);
-      await addAssign(address, taskItem, checkedList);
+      await addAssign(address, taskItem);
       setIsInProcess(false);
       setNotification({
         header: "登録が完了しました。",
@@ -113,7 +111,28 @@ const TaskItem = (props) => {
       showRequestConnectWallet();
       return;
     }
-    await mintCompletionToken(address, taskItem, checkedList);
+
+    try {
+      setIsInProcess(true);
+      await mintCompletionToken(address, taskItem);
+      setIsInProcess(false);
+      setNotification({
+        header: "Mintが完了しました。",
+        context:
+          "後ほどアサイントークンが発行されます。活動へのご協力ありがとうございます。",
+        isShow: true,
+        isSuccess: true,
+        callback: setNotification,
+      });
+    } catch (error) {
+      setNotification({
+        header: "Mintに失敗しました。",
+        context: error.message,
+        isShow: true,
+        isSuccess: false,
+        callback: setNotification,
+      });
+    }
   };
 
   const showRequestConnectWallet = () => {
@@ -133,7 +152,7 @@ const TaskItem = (props) => {
         <div className="flex justify-between">
           <div className="sr-only">Channel</div>
           <div className="flex text-sm text-gray-500">{taskItem.channel}</div>
-          <div className="flex text-sm text-gray-500">{taskItem.guildId}</div>
+          {/* <div className="flex text-sm text-gray-500">{taskItem.guildId}</div> */}
           <div className="sr-only">Date</div>
           <div className="flex text-sm text-gray-500">
             {new Date(taskItem.date).toLocaleString()}
@@ -155,6 +174,7 @@ const TaskItem = (props) => {
                     type="checkbox"
                     className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
                     onChange={() => checkHandler(index)}
+                    checked={task.checked}
                   />
                 </div>
                 <div className="ml-3 text-sm leading-6">
@@ -162,7 +182,7 @@ const TaskItem = (props) => {
                     htmlFor={`taskitem-${taskItem.id}-checkbox-${index}`}
                     className="font-medium text-gray-900"
                   >
-                    {task}
+                    {task.name}
                   </label>{" "}
                 </div>
               </div>

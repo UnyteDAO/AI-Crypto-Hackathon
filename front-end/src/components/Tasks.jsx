@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
 import TaskItem from "./TaskItem";
-import { getTasks } from "../modules/Notion.mjs";
+import { getAssign, getTasks } from "../modules/Notion.mjs";
 
 const Tasks = (props) => {
+  const { address } = useAccount();
   const [taskData, setTaskData] = useState([]);
   const [displayData, setDisplayData] = useState([]);
   const [nextCursor, setNextCursor] = useState("");
@@ -10,13 +12,48 @@ const Tasks = (props) => {
   useEffect(() => {
     const initializeTaskData = async () => {
       const result = await getTasks();
+      const assignResult = await getAssign(address);
+      for(const assign of assignResult.tasks) {
+        const targetIndex = result.tasks.findIndex(
+          (item) => item.id === assign.id
+        );
+        if (targetIndex > -1) {
+          for (const index of assign.taskIndexes) {
+            result.tasks[targetIndex].tasks[index].checked = true;
+          }
+        }
+      };
+
       setTaskData(result.tasks);
       setDisplayData(result.tasks);
       setNextCursor(result.nextCursor);
-      console.log(result);
     };
     initializeTaskData();
   }, []);
+
+  useEffect(() => {
+    setDisplayData([]);
+    const initializeTaskData = async () => {
+      const result = await getTasks();
+      const assignResult = await getAssign(address);
+      for(const assign of assignResult.tasks) {
+        const targetIndex = result.tasks.findIndex(
+          (item) => item.id === assign.id
+        );
+        if (targetIndex > -1) {
+          for (const index of assign.taskIndexes) {
+            result.tasks[targetIndex].tasks[index].checked = true;
+          }
+        }
+      };
+
+      setTaskData(result.tasks);
+      setDisplayData(result.tasks);
+      setNextCursor(result.nextCursor);
+    };
+    initializeTaskData();
+  }, [address]);  
+
 
   useEffect(() => {
     const getNextTasks = async () => {
@@ -65,14 +102,6 @@ const Tasks = (props) => {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
       {[...displayData].map((data, index) => {
-        let tasks = [];
-        const regx = /- \[ \] (.+)\n?/g;
-        const matches = data.tasks.match(regx);
-        if (matches) {
-          for (const match of matches) {
-            tasks = [...tasks, match.replace("- [ ] ", "")];
-          }
-        }
         return (
           <TaskItem
             key={`${data.channelId}-${data.date}-${index}`}
@@ -81,7 +110,7 @@ const Tasks = (props) => {
             channel={data.channelId}
             messageId={data.messageId}
             summary={data.summary}
-            tasks={tasks}
+            tasks={data.tasks}
             date={data.date}
           />
         );
