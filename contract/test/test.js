@@ -19,7 +19,7 @@ describe("Hackathon", function () {
   describe("mint", function () {
     it("Should mint a new token with the given ipfs link and task id", async function () {
       // mint関数を呼び出す
-      await hackathon.connect(owner).mint(addr1.address, "ipfs://Qm...", "123");
+      await hackathon.connect(owner).mint(addr1.address, "ipfs://Qm...", "123","doing", "Unyte");
 
       // トークンの所有者がaddr1であることを確認する
       expect(await hackathon.balanceOf(addr1.address, 1)).to.equal(1);
@@ -31,13 +31,14 @@ describe("Hackathon", function () {
         const decodedUri = Buffer.from(uri.split(",")[1], "base64").toString();
         expect(decodedUri).to.contain("ipfs://Qm...");
         expect(decodedUri).to.contain("123");
+        expect(decodedUri).to.contain("doing");
 
     });
 
     it("Should revert if the caller is not the owner", async function () {
       // mint関数をaddr2から呼び出すとエラーになることを確認する
       await expect(
-        hackathon.connect(addr2).mint(addr1.address, "ipfs://Qm...", "123")
+        hackathon.connect(addr2).mint(addr1.address, "ipfs://Qm...", "123","doing", "Unyte")
       ).to.be.revertedWith("Only owner can mint");
     });
   });
@@ -49,7 +50,9 @@ describe("Hackathon", function () {
       await hackathon.connect(owner).mintBatch(
         [addr1.address, addr2.address],
         ["ipfs://Qm...", "ipfs://Qq..."],
-        ["123", "456"]
+        ["123", "456"],
+        ["doing","done"],
+        ["Unyte","Unyte"]
       );
 
       // トークンの所有者がaddr1とaddr2であることを確認する
@@ -65,8 +68,12 @@ describe("Hackathon", function () {
         const decodedUri2 = Buffer.from(uri2.split(",")[1], "base64").toString();
         expect(decodedUri1).to.contain("ipfs://Qm...");
         expect(decodedUri1).to.contain("123");
+        expect(decodedUri1).to.contain("doing");
+        expect(decodedUri1).to.contain("Unyte");
         expect(decodedUri2).to.contain("ipfs://Qq...");
         expect(decodedUri2).to.contain("456");
+        expect(decodedUri2).to.contain("done");
+        expect(decodedUri2).to.contain("Unyte");
     });
 
     it("Should revert if the caller is not the owner", async function () {
@@ -75,7 +82,9 @@ describe("Hackathon", function () {
         hackathon.connect(addr2).mintBatch(
           [addr1.address, addr2.address],
           ["ipfs://Qm...", "ipfs://Qm..."],
-          ["123", "456"]
+          ["123", "456"],
+          ["doing","done"],
+          ["Unyte","Unyte"]
         )
       ).to.be.revertedWith("Only owner can mint");
     });
@@ -86,7 +95,9 @@ describe("Hackathon", function () {
         hackathon.connect(owner).mintBatch(
           [addr1.address],
           ["ipfs://Qm...", "ipfs://Qm..."],
-          ["123", "456"]
+          ["123", "456"],
+          ["doing","done"],
+          ["Unyte","Unyte"]
         )
       ).to.be.revertedWith("All arrays must have the same length");
     });
