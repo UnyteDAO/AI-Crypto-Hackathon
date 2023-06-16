@@ -1,3 +1,8 @@
+const TaskStatus = Object.freeze({
+  active: 1,
+  fixed: 2,
+  completed: 3,
+});
 
 const getTasks = async (nextCursor = "") => {
   try {
@@ -19,6 +24,14 @@ const getTasks = async (nextCursor = "") => {
       const channelId = item.properties.channelId.rich_text[0].plain_text;
       const messageId = item.properties.id.title[0].plain_text;
       const summary = item.properties.summary.rich_text[0].plain_text;
+
+      let status = TaskStatus.active;
+      if (item.properties.status.select?.name === "fixed") {
+        status = TaskStatus.fixed;
+      } else if (item.properties.status.select?.name === "completed") {
+        status = TaskStatus.completed;
+      }
+
       let tasks = [];
       const regx = /- \[ \] (.+)\n?/g;
       const matches = item.properties.tasks.rich_text[0].plain_text.match(regx);
@@ -32,7 +45,16 @@ const getTasks = async (nextCursor = "") => {
       }
 
       const date = item.properties.date.date.start;
-      return { id, guildId, channelId, messageId, date, summary, tasks };
+      return {
+        id,
+        guildId,
+        channelId,
+        messageId,
+        date,
+        summary,
+        status,
+        tasks,
+      };
     });
 
     return {
@@ -207,22 +229,32 @@ const mintAssignToken = async (address, taskItem) => {
     responseJson.results.map((item) => {
       const address = item.properties.assignUserAddress.rich_text[0].plain_text;
       for (const taskIndex of item.properties.tasksIndexies.multi_select) {
-        recievers[taskIndex.name] = [
-          ...(recievers[taskIndex.name] ?? []),
-          address,
-        ];
+        const isSelected = taskItem.tasks[taskIndex.name].checked;
+        if (isSelected) {
+          recievers[taskIndex.name] = [
+            ...(recievers[taskIndex.name] ?? []),
+            address,
+          ];
+        }
       }
     });
 
     let tasks = [];
     for (const [index, address] of Object.entries(recievers)) {
-      tasks = [
-        ...tasks,
-        {
-          walletAddress: address,
-          task: { name: "", id: `${taskItem.id}-${index}` },
-        },
-      ];
+      if (address.length > 0) {
+        const taskName = taskItem.tasks[index].name;
+        tasks = [
+          ...tasks,
+          {
+            walletAddress: address,
+            task: { name: taskName, id: `${taskItem.id}-${index}` },
+          },
+        ];
+      }
+    }
+
+    if (tasks.length === 0) {
+      throw new Error("アサインされたタスクがありません。");
     }
 
     const usersInfo = await getUsers(address);
@@ -243,7 +275,9 @@ const mintAssignToken = async (address, taskItem) => {
       tasks: tasks,
     };
 
-    console.log(requestData);
+    await updateStatus(taskItem,"fixed");
+
+
     const options = {
       method: "POST",
       headers: {
@@ -252,7 +286,7 @@ const mintAssignToken = async (address, taskItem) => {
       body: JSON.stringify(requestData),
     };
     const mintResponse = await fetch(
-      "https://a5guh723j5wcy2ns7vopdfjcu40qukfn.lambda-url.ap-northeast-1.on.aws/",
+      "https://3emm6xaoyufyll6xdmocaxmrou0ogrfi.lambda-url.ap-northeast-1.on.aws/",
       options
     );
 
@@ -286,26 +320,38 @@ const mintCompletionToken = async (address, taskItem) => {
     responseJson.results.map((item) => {
       const address = item.properties.assignUserAddress.rich_text[0].plain_text;
       for (const taskIndex of item.properties.tasksIndexies.multi_select) {
-        recievers[taskIndex.name] = [
-          ...(recievers[taskIndex.name] ?? []),
-          address,
-        ];
+        const isSelected = taskItem.tasks[taskIndex.name].checked;
+        if (isSelected) {
+          recievers[taskIndex.name] = [
+            ...(recievers[taskIndex.name] ?? []),
+            address,
+          ];
+        }
       }
     });
 
     let tasks = [];
     for (const [index, address] of Object.entries(recievers)) {
-      tasks = [
-        ...tasks,
-        {
-          walletAddress: address,
-          task: { name: "", id: `${taskItem.id}-${index}` },
-        },
-      ];
+      if (address.length > 0) {
+        const taskName = taskItem.tasks[index].name;
+        tasks = [
+          ...tasks,
+          {
+            walletAddress: address,
+            task: { name: taskName, id: `${taskItem.id}-${index}` },
+          },
+        ];
+      }
+    }
+
+    if (tasks.length === 0) {
+      throw new Error("アサインされたタスクがありません。");
     }
 
     const usersInfo = await getUsers(address);
     const guildsInfo = await getGuilds(taskItem.guildId);
+
+    await updateStatus(taskItem,"completed");
 
     const requestData = {
       status: "done",
@@ -331,7 +377,7 @@ const mintCompletionToken = async (address, taskItem) => {
       body: JSON.stringify(requestData),
     };
     const mintResponse = await fetch(
-      "https://a5guh723j5wcy2ns7vopdfjcu40qukfn.lambda-url.ap-northeast-1.on.aws/",
+      "https://3emm6xaoyufyll6xdmocaxmrou0ogrfi.lambda-url.ap-northeast-1.on.aws/",
       options
     );
 
@@ -344,6 +390,38 @@ const mintCompletionToken = async (address, taskItem) => {
   }
 };
 
+const updateStatus = async (taskItem, status) => {
+  try {
+
+    const requestData = {
+      id: taskItem.id,
+      status: status,
+    };
+
+    console.log(requestData);
+
+    //https://3emm6xaoyufyll6xdmocaxmrou0ogrfi.lambda-url.ap-northeast-1.on.aws/
+    const response = await fetch(
+      `https://notionmanager.ukishima.repl.co/status`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        compress: true,
+        body: JSON.stringify(requestData),
+      }
+    );
+
+    if (!response) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error(error);
+    throw new Error("ステータス更新失敗", { caluse: error });
+  }
+};
+
 export {
   getTasks,
   getUsers,
@@ -351,4 +429,5 @@ export {
   getAssign,
   mintAssignToken,
   mintCompletionToken,
+  updateStatus
 };

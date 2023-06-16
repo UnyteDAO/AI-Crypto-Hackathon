@@ -112,6 +112,7 @@ const Tasks = (props) => {
             summary={data.summary}
             tasks={data.tasks}
             date={data.date}
+            status={data.status}
           />
         );
       })}
