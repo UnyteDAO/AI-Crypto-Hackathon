@@ -1,4 +1,4 @@
-contract address(mumbai) : https://mumbai.polygonscan.com/token/0x46bE7280DBd7B3cC650c4B0AE3DD087BD870C62B
+contract address(mumbai) : https://mumbai.polygonscan.com/token/0x6D05Cba62d8473d9F3829dDd03a76d7C64856C1f
 sample NFT(mumbai) : https://testnets.opensea.io/ja/collection/unidentified-contract-27924
 
 # Sample Hardhat Project

@@ -17,13 +17,16 @@ contract Hackathon is ERC1155URIStorage {
         owner = msg.sender;
     }
 
+    event Mint(address indexed to, string indexed documentId, string taskId);
+
     // 画像データのipfsリンクを引数としてトークンを発行する関数
     function mint(
         address _owner,
         string memory _ipfsLink,
-        string memory _taskId,
         string memory _type,
-        string memory _team
+        string memory _team,
+        string memory _taskId,
+        string memory _documentId
     ) public {
         // オーナーのみが発行できるようにする
         require(msg.sender == owner, "Only owner can mint");
@@ -83,18 +86,17 @@ contract Hackathon is ERC1155URIStorage {
 
         _mint(_owner, _currentTokenID, 1, "");
         _setURI(_currentTokenID, finalTokenUri);
+        emit Mint(_owner, _documentId, _taskId);
     }
-
-    // トークンを送ったときのイベント
-    event Sent(address indexed to, uint256 indexed id, uint256 amount);
 
     // トークンのバッチでのミントを行う関数を以下に実装する
     function mintBatch(
         address[] memory _owners,
         string[] memory _ipfsLinks,
-        string[] memory _taskIds,
         string[] memory _types,
-        string[] memory _teams
+        string[] memory _teams,
+        string[] memory _taskIds,
+        string[] memory _documentIds
     ) public {
         // 全ての配列の長さが同じであることを確認する
         require(
@@ -109,7 +111,14 @@ contract Hackathon is ERC1155URIStorage {
 
         // 配列の長さの数だけmintを繰り返す
         for (uint256 i = 0; i < _owners.length; i++) {
-            mint(_owners[i], _ipfsLinks[i], _taskIds[i], _types[i], _teams[i]);
+            mint(
+                _owners[i],
+                _ipfsLinks[i],
+                _types[i],
+                _teams[i],
+                _taskIds[i],
+                _documentIds[i]
+            );
         }
     }
 }
