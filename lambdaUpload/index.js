@@ -87,9 +87,10 @@ exports.handler = async function (event, context) {
 	// コントラクトを叩くための引数にあたる配列を作成
 	let owners = []
 	let _ipfsLinks = []
-	let _taskIds = []
 	let _types = []
 	let _teams = []
+	let _taskIds = []
+	let _documentIds = []
 
 	// const path = await createNFTImage(requester.id, "Unyte task", status, "https://pbs.twimg.com/media/FyjEYVzacAEJwqD?format=jpg", "https://pbs.twimg.com/media/FyjEYVzacAEJwqD?format=jpg", "white");
 	const path = './image/png/0.png'
@@ -117,13 +118,16 @@ exports.handler = async function (event, context) {
         console.log(walletAddress,taskContent)
 		console.log(taskContent.name)
 
+		// documentIdを作成(idの末尾の2文字を削除)
+		const documentId = taskContent.id.slice(0, -2);
 		// 受取者ごとに配列に追加
 		for (let i = 0; i < walletAddress.length; i++) {
 			owners.push(walletAddress[i]);
 			_ipfsLinks.push(hash);
-			_taskIds.push(taskContent.id);
 			_types.push(status);
 			_teams.push(team.name);
+			_taskIds.push(taskContent.id);
+			_documentIds.push(documentId);
 		}
     }
 
@@ -141,9 +145,10 @@ exports.handler = async function (event, context) {
 
 	console.log(owners)
 	console.log(_ipfsLinks)
-	console.log(_taskIds)
 	console.log(_types)
 	console.log(_teams)
+	console.log(_taskIds)
+	console.log(_documentIds)
 	// タスク毎にNFTをmintする
 	let txStatus = "";
 	let txHash = "";
@@ -152,9 +157,10 @@ exports.handler = async function (event, context) {
 		const txn = await connectedContract.mintBatch(
 			owners,
 			_ipfsLinks,
-			_taskIds,
 			_types,
-			_teams
+			_teams,
+			_taskIds,
+			_documentIds
 		);
 		// console.log(txn);
 		// txStatus = "success"
