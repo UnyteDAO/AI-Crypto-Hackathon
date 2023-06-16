@@ -73,6 +73,27 @@ exports.handler = async function (event, context) {
 		return(`/tmp/${userid}.png`);
 	};
 
+	const createNFTJSON = async (_team,_type,_name,_ipfsLink) => {
+		// 以下のJSONをjsベースのコードで生成する
+		const JSON = {
+			attributes: [
+				{
+				trait_type: "Team",
+				value: _team
+				},
+				{
+				trait_type: "Type",
+				value: _type
+				}
+			],
+			name: _name,
+			symbol: "UNYTE",
+			description: "NFTs attesting to their contribution in the DAOs recorded by Unyte. With Unyte, members can easily record proposals, contributions and praise comments using slash commands. We can also send ERC20 tokens, NFT or WL depending on what is being recorded. More info: https://unyte.team/",
+			image: _ipfsLink,
+			external_url: "https://beta.unyte.team/"
+		}
+	}
+
     console.log(event)
     const data = JSON.parse(event.body)
 	// const data = event.body
@@ -87,8 +108,6 @@ exports.handler = async function (event, context) {
 	// コントラクトを叩くための引数にあたる配列を作成
 	let owners = []
 	let _ipfsLinks = []
-	let _types = []
-	let _teams = []
 	let _taskIds = []
 	let _documentIds = []
 
@@ -97,9 +116,9 @@ exports.handler = async function (event, context) {
 	// データをipfsにアップロード
 	let hash = "";
 	if(status == "doing"){
-		hash = "QmepboQBo9oTfkfqHM8nKuXZ3W1UBThWBRBLFwveuZP7Z7"
+		hash = "QmXFMDrZTBoAVHUoKCGx6HiRwyrg5iBsj1zRo1pn3uwm8N"
 	}else if(status == "done"){
-		hash = "QmPy6xxBygx1GGGWwn1D8jik8kAEHMBCoNe3KLN59zKyRY"
+		hash = "QmabyySPzFQsEVFtmWy3dLhXsvFbQRMfmgZkmAnXaX3S6e"
 	}
 	// await pinata.pinFromFS(path).then((result) => {
 	// 	//handle results here
@@ -124,8 +143,6 @@ exports.handler = async function (event, context) {
 		for (let i = 0; i < walletAddress.length; i++) {
 			owners.push(walletAddress[i]);
 			_ipfsLinks.push(hash);
-			_types.push(status);
-			_teams.push(team.name);
 			_taskIds.push(taskContent.id);
 			_documentIds.push(documentId);
 		}
@@ -143,12 +160,6 @@ exports.handler = async function (event, context) {
 	// コントラクトのインスタンスを作成
 	const connectedContract = new ethers.Contract(contractAddress, contractABI.abi, walletWithProvider);
 
-	console.log(owners)
-	console.log(_ipfsLinks)
-	console.log(_types)
-	console.log(_teams)
-	console.log(_taskIds)
-	console.log(_documentIds)
 	// タスク毎にNFTをmintする
 	let txStatus = "";
 	let txHash = "";
@@ -157,8 +168,6 @@ exports.handler = async function (event, context) {
 		const txn = await connectedContract.mintBatch(
 			owners,
 			_ipfsLinks,
-			_types,
-			_teams,
 			_taskIds,
 			_documentIds
 		);
