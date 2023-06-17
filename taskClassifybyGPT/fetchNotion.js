@@ -2,15 +2,14 @@
 const { Client } = require("@notionhq/client")
 const axios = require("axios");
 const fs = require("fs");
+require("dotenv").config();
 
-process.env.OPENAI_API_KEY = "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";
 const { Configuration, OpenAIApi } = require("openai");
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
 
-process.env.NOTION_API_KEY = "secret_ymvJN8h14QZom8wBJXNb0wvPZVtRFHHFp3sbEmqNc83";
 // notionAPIのキーを環境変数から取得
 const notion = new Client({ auth: process.env.NOTION_API_KEY })
 
@@ -62,8 +61,8 @@ async function displayDatabase(data) {
                         i++;
                     } else {
                         console.log(taskId);
-                        resultArray.push({id: taskId,task: task.plain_text, type: answer.content});
                         const answer = await runPrompt(task.plain_text,item.properties.Summary.rich_text[0].plain_text,["開発", "ビジネス", "デザイン", "コミュニティマネジメント", "その他"]);
+                        resultArray.push({id: taskId,task: task.plain_text, type: answer.content});
                         i++;
                     }
                 }
