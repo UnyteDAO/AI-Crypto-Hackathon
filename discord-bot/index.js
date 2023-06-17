@@ -62,10 +62,17 @@ client.once(Events.ClientReady, (c) => {
       await createNewPage(message, FirstMessageId, history, userIds);
     } else {
       console.log("FirstMessageId is found.");
-      const pageId = await getPageId(existingFirstMessageIdExists);
-      if (isStatusActive(FirstMessageId)) {
+      const existingStatusActive = await isStatusActive(FirstMessageId);
+      console.log("existingStatusActive: ", existingStatusActive);
+      if (existingStatusActive) {
         console.log("FirstMessageId is found, and Status is active.");
-        await updatePage(pageId, message, FirstMessageId, history, userIds);
+        await updatePage(
+          existingFirstMessageIdExists,
+          message,
+          FirstMessageId,
+          history,
+          userIds
+        );
       }
     }
   });
@@ -140,6 +147,11 @@ const createNewPage = async (message, FirstMessageId, history, userIds) => {
             },
           ],
         },
+        Status: {
+          select: {
+            name: "active",
+          },
+        },
         History: {
           rich_text: [
             {
@@ -176,11 +188,12 @@ const createNewPage = async (message, FirstMessageId, history, userIds) => {
   try {
     const response = await axios.request(options);
     console.log("T");
-    console.log(response);
+    console.log(response.data);
   } catch (error) {
     console.error(error);
   }
 };
+
 const isFirstMessageIdExists = async (FirstMessageId) => {
   const options = {
     method: "POST",
@@ -202,13 +215,18 @@ const isFirstMessageIdExists = async (FirstMessageId) => {
   };
   try {
     const response = await axios.request(options);
-    console.log("T");
-    return response.results.length === 0 ? false : response.results[0].id;
+    console.log("success");
+    return response.data &&
+      response.data.results &&
+      response.data.results.length === 0
+      ? false
+      : response.data.results[0].id;
   } catch (error) {
     console.error(error);
     return null;
   }
 };
+
 const isStatusActive = async (FirstMessageId) => {
   const options = {
     method: "POST",
@@ -240,8 +258,12 @@ const isStatusActive = async (FirstMessageId) => {
   };
   try {
     const response = await axios.request(options);
-    console.log("T");
-    return response.results.length === 0 ? false : response.results[0].id;
+    console.log("success");
+    return response.data &&
+      response.data.results &&
+      response.data.results.length === 0
+      ? false
+      : response.data.results[0].id;
   } catch (error) {
     console.error(error);
     return null;
@@ -310,7 +332,7 @@ const updatePage = async (
   try {
     const response = await axios.request(options);
     console.log("T");
-    console.log(response);
+    console.log(response.data);
   } catch (error) {
     console.error(error);
   }
