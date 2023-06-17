@@ -31,7 +31,7 @@ client.once(Events.ClientReady, (c) => {
   client.on(Events.MessageCreate, async (message) => {
     const maxHistoryNumber = 20;
     let cleanMessage = `${message.author.username}: ${message.cleanContent}`;
-    let oldestMessageId = "";
+    let FirstMessageId = "";
     let userIds = [];
     userIds.push(message.author.id);
 
@@ -47,18 +47,31 @@ client.once(Events.ClientReady, (c) => {
         );
         return await createMessageHistory(ref, messages);
       } else {
-        oldestMessageId = message.id;
+        FirstMessageId = message.id;
         return messages;
       }
     };
 
     const history = await createMessageHistory(message);
     userIds = userIds.map((userId) => ({ name: userId }));
-    await sendToNotion(message, oldestMessageId, history, userIds);
+    const existingFirstMessageIdExists = await isFirstMessageIdExists(
+      FirstMessageId
+    );
+    if (!existingFirstMessageIdExists) {
+      console.log("FirstMessageId is not existing.");
+      await createNewPage(message, FirstMessageId, history, userIds);
+    } else {
+      console.log("FirstMessageId is found.");
+      const pageId = await getPageId(existingFirstMessageIdExists);
+      if (isStatusActive(FirstMessageId)) {
+        console.log("FirstMessageId is found, and Status is active.");
+        await updatePage(pageId, message, FirstMessageId, history, userIds);
+      }
+    }
   });
 });
 
-const sendToNotion = async (message, oldestMessageId, history, userIds) => {
+const createNewPage = async (message, FirstMessageId, history, userIds) => {
   let newHistory = history;
   const formattedArr = newHistory.map((item, index, array) => {
     const [key, value] = item.split(": ");
@@ -109,16 +122,16 @@ const sendToNotion = async (message, oldestMessageId, history, userIds) => {
             },
           ],
         },
-        LastMessageId: {
+        FirstMessageId: {
           rich_text: [
             {
               text: {
-                content: oldestMessageId,
+                content: FirstMessageId,
               },
             },
           ],
         },
-        LastMessageCreatedAt: {
+        FirstMessageCreatedAt: {
           rich_text: [
             {
               text: {
@@ -163,11 +176,145 @@ const sendToNotion = async (message, oldestMessageId, history, userIds) => {
   try {
     const response = await axios.request(options);
     console.log("T");
+    console.log(response);
+  } catch (error) {
+    console.error(error);
+  }
+};
+const isFirstMessageIdExists = async (FirstMessageId) => {
+  const options = {
+    method: "POST",
+    url: "https://api.notion.com/v1/databases/ad9d405ef0574f6eaf061574d50d5178/query",
+    headers: {
+      accept: "application/json",
+      "Notion-Version": "2022-06-28",
+      "content-type": "application/json",
+      Authorization: "Bearer " + process.env.N_TOKEN,
+    },
+    data: {
+      filter: {
+        property: "FirstMessageId",
+        rich_text: {
+          equals: FirstMessageId,
+        },
+      },
+    },
+  };
+  try {
+    const response = await axios.request(options);
+    console.log("T");
+    return response.results.length === 0 ? false : response.results[0].id;
   } catch (error) {
     console.error(error);
     return null;
   }
 };
+const isStatusActive = async (FirstMessageId) => {
+  const options = {
+    method: "POST",
+    url: "https://api.notion.com/v1/databases/ad9d405ef0574f6eaf061574d50d5178/query",
+    headers: {
+      accept: "application/json",
+      "Notion-Version": "2022-06-28",
+      "content-type": "application/json",
+      Authorization: "Bearer " + process.env.N_TOKEN,
+    },
+    data: {
+      filter: {
+        and: [
+          {
+            property: "FirstMessageId",
+            rich_text: {
+              equals: FirstMessageId,
+            },
+          },
+          {
+            property: "Status",
+            select: {
+              equals: "active",
+            },
+          },
+        ],
+      },
+    },
+  };
+  try {
+    const response = await axios.request(options);
+    console.log("T");
+    return response.results.length === 0 ? false : response.results[0].id;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+const updatePage = async (
+  pageId,
+  message,
+  FirstMessageId,
+  history,
+  userIds
+) => {
+  let newHistory = history;
+  const formattedArr = newHistory.map((item, index, array) => {
+    const [key, value] = item.split(": ");
+    return index < array.length - 1
+      ? `\`${key}\`: \`${value}\`\n-----`
+      : `\`${key}\`: \`${value}\``;
+  });
+  newHistory = formattedArr.join("\n");
 
-// ログインします
+  const options = {
+    method: "PATCH",
+    url: `https://api.notion.com/v1/pages/${pageId}`,
+    headers: {
+      accept: "application/json",
+      "Notion-Version": "2022-06-28",
+      "content-type": "application/json",
+      Authorization: "Bearer " + process.env.N_TOKEN,
+    },
+    data: {
+      properties: {
+        History: {
+          rich_text: [
+            {
+              text: {
+                content: newHistory,
+              },
+            },
+          ],
+        },
+        RawHistory: {
+          rich_text: [
+            {
+              text: {
+                content: JSON.stringify(history),
+              },
+            },
+          ],
+        },
+        UpdatedAt: {
+          rich_text: [
+            {
+              text: {
+                content: JSON.stringify(Date.now()),
+              },
+            },
+          ],
+        },
+        UserIds: {
+          multi_select: userIds,
+        },
+      },
+    },
+  };
+  try {
+    const response = await axios.request(options);
+    console.log("T");
+    console.log(response);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// login
 client.login(process.env.D_TOKEN);
