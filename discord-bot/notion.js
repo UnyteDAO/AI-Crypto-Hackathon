@@ -101,7 +101,7 @@ const createNewPage = async (message, FirstMessageId, history, userIds) => {
           rich_text: [
             {
               text: {
-                content: JSON.stringify(sammaryAndTask[0]),
+                content: sammaryAndTask[0],
               },
             },
           ],
@@ -110,19 +110,15 @@ const createNewPage = async (message, FirstMessageId, history, userIds) => {
           rich_text: [
             {
               text: {
-                content: JSON.stringify(sammaryAndTask[1]),
+                content: sammaryAndTask[1],
               },
             },
           ],
         },
         GPTTaskType: {
-          rich_text: [
-            {
-              text: {
-                content: JSON.stringify(taskType),
-              },
-            },
-          ],
+          select: {
+            name: taskType,
+          },
         },
         CreatedAt: {
           rich_text: [
@@ -232,7 +228,7 @@ const updatePage = async (pageId, history, userIds) => {
       : `\`${key}\`: \`${value}\``;
   });
   newHistory = formattedArr.join("\n");
-  const sammaryAndTask = await getSummaryAndTask(newHistory); // [summary, task]
+  const sammaryAndTask = await getSummaryAndTask(history); // [summary, task]
   const taskType = await getTaskType(sammaryAndTask[1], sammaryAndTask[0]);
 
   const options = {
@@ -268,7 +264,7 @@ const updatePage = async (pageId, history, userIds) => {
           rich_text: [
             {
               text: {
-                content: JSON.stringify(sammaryAndTask[0]),
+                content: sammaryAndTask[0],
               },
             },
           ],
@@ -277,19 +273,15 @@ const updatePage = async (pageId, history, userIds) => {
           rich_text: [
             {
               text: {
-                content: JSON.stringify(sammaryAndTask[1]),
+                content: sammaryAndTask[1],
               },
             },
           ],
         },
         GPTTaskType: {
-          rich_text: [
-            {
-              text: {
-                content: JSON.stringify(taskType),
-              },
-            },
-          ],
+          select: {
+            name: taskType,
+          },
         },
         UpdatedAt: {
           rich_text: [
