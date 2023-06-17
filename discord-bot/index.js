@@ -10,6 +10,7 @@ const {
   GatewayIntentBits,
   Partials,
 } = require("discord.js");
+const { getSummaryAndTask, getTaskType } = require("./openai");
 
 // クライアントインスタンスと呼ばれるオブジェクトを作成します
 const client = new Client({
@@ -57,6 +58,7 @@ client.once(Events.ClientReady, (c) => {
     const existingFirstMessageIdExists = await isFirstMessageIdExists(
       FirstMessageId
     );
+
     if (!existingFirstMessageIdExists) {
       console.log("FirstMessageId is not existing.");
       await createNewPage(message, FirstMessageId, history, userIds);
@@ -87,6 +89,8 @@ const createNewPage = async (message, FirstMessageId, history, userIds) => {
       : `\`${key}\`: \`${value}\``;
   });
   newHistory = formattedArr.join("\n");
+  const sammaryAndTask = await getSummaryAndTask(cleanMessage); // [summary, task]
+  const taskType = await getTaskType(sammaryAndTask[1], sammaryAndTask[0]);
 
   const options = {
     method: "POST",
@@ -166,6 +170,33 @@ const createNewPage = async (message, FirstMessageId, history, userIds) => {
             {
               text: {
                 content: JSON.stringify(history),
+              },
+            },
+          ],
+        },
+        GPTSummary: {
+          rich_text: [
+            {
+              text: {
+                content: JSON.stringify(sammaryAndTask[0]),
+              },
+            },
+          ],
+        },
+        GPTTask: {
+          rich_text: [
+            {
+              text: {
+                content: JSON.stringify(sammaryAndTask[1]),
+              },
+            },
+          ],
+        },
+        GPTTaskType: {
+          rich_text: [
+            {
+              text: {
+                content: JSON.stringify(taskType),
               },
             },
           ],
@@ -269,13 +300,7 @@ const isStatusActive = async (FirstMessageId) => {
     return null;
   }
 };
-const updatePage = async (
-  pageId,
-  message,
-  FirstMessageId,
-  history,
-  userIds
-) => {
+const updatePage = async (pageId, history, userIds) => {
   let newHistory = history;
   const formattedArr = newHistory.map((item, index, array) => {
     const [key, value] = item.split(": ");
@@ -284,6 +309,8 @@ const updatePage = async (
       : `\`${key}\`: \`${value}\``;
   });
   newHistory = formattedArr.join("\n");
+  const sammaryAndTask = await getSummaryAndTask(cleanMessage); // [summary, task]
+  const taskType = await getTaskType(sammaryAndTask[1], sammaryAndTask[0]);
 
   const options = {
     method: "PATCH",
@@ -310,6 +337,33 @@ const updatePage = async (
             {
               text: {
                 content: JSON.stringify(history),
+              },
+            },
+          ],
+        },
+        GPTSummary: {
+          rich_text: [
+            {
+              text: {
+                content: JSON.stringify(sammaryAndTask[0]),
+              },
+            },
+          ],
+        },
+        GPTTask: {
+          rich_text: [
+            {
+              text: {
+                content: JSON.stringify(sammaryAndTask[1]),
+              },
+            },
+          ],
+        },
+        GPTTaskType: {
+          rich_text: [
+            {
+              text: {
+                content: JSON.stringify(taskType),
               },
             },
           ],
