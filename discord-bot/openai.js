@@ -20,11 +20,9 @@ const getSummaryAndTask = async (rawText) => {
     messages: [{ role: "user", content: modelPromptTask }],
   });
 
-  console.log(completionSummary.data.choices[0].message);
-  console.log(completionTask.data.choices[0].message);
   return [
-    completionSummary.data.choices[0].message,
-    completionTask.data.choices[0].message,
+    completionSummary.data.choices[0].message.content,
+    completionTask.data.choices[0].message.content,
   ];
 };
 
@@ -48,7 +46,7 @@ const getTaskType = async (task, summary) => {
     messages: [{ role: gptRole, content: modelPrompt }],
   });
 
-  return completion.data.choices[0].message;
+  return completion.data.choices[0].message.content;
 };
 
 module.exports = { getSummaryAndTask, getTaskType };
