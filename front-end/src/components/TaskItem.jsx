@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import {
   HandRaisedIcon,
   PlayIcon,
@@ -7,7 +7,11 @@ import {
 } from "@heroicons/react/24/outline";
 import { useAccount } from "wagmi";
 
-import { addAssign, mintCompletionToken } from "../modules/Notion.mjs";
+import {
+  addAssign,
+  getUsers,
+  mintCompletionToken,
+} from "../modules/Notion.mjs";
 
 import Notification from "./Notification";
 import SelectTasks from "./SelectTasks";
@@ -28,6 +32,7 @@ const defaultTaskItem = {
   tasks: [],
   date: "",
   status: TaskStatus.active,
+  assigns: { users: [], indexes: [] },
 };
 
 const TaskItem = (props) => {
@@ -45,7 +50,7 @@ const TaskItem = (props) => {
   const [isInMintCompleteTokenProcess, setIsInMintCompleteTokenProcess] =
     useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setTaskItem((prev) => ({ ...prev, ...props }));
   }, []);
 
@@ -68,8 +73,51 @@ const TaskItem = (props) => {
 
     try {
       setIsInAssignProcess(true);
-      await addAssign(address, taskItem);
+
+      const isSomeChecked = taskItem.tasks.some((task) => {
+        return task.checked;
+      });
+
+      const assignedUser = await addAssign(address, taskItem);
+      console.log(assignedUser);
+
+      setTaskItem((prev) => {
+        let result = { ...prev };
+        const isAssigned = result.assigns.users.find((user) => {
+          return user.assignUserAddress == address;
+        });
+
+        if (!isAssigned) {
+          result.assigns.users = [
+            ...prev.assigns.users,
+            { assignUserAddress: address, iconUrl: assignedUser[0].iconUrl },
+          ];
+        }
+
+        if (!isSomeChecked) {
+          result.assigns.users = result.assigns.users.filter(
+            (item) => item.assignUserAddress != address
+          );
+        }
+
+        return result;
+      });
+
       setIsInAssignProcess(false);
+
+      if (!isSomeChecked) {
+        setNotification({
+          header: "アサインが取り消されました。",
+          context:
+            "選択されているタスクがない為、アサインが取り消されています。",
+          isShow: true,
+          isSuccess: true,
+          txHash: "",
+          callback: setNotification,
+        });
+        return;
+      }
+
       setNotification({
         header: "アサインが完了しました。",
         context:
@@ -133,6 +181,7 @@ const TaskItem = (props) => {
       context: "右上の [ Connect Wallet ] から接続してください。",
       isShow: true,
       isSuccess: false,
+      txHash: "",
       callback: setNotification,
     });
   };
@@ -142,7 +191,7 @@ const TaskItem = (props) => {
   };
 
   return (
-    <div className="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
+    <div className="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow-lg">
       <Notification {...notification} />
       <SelectTasks
         isOpen={isInMintAssignTokenProcess}
@@ -156,6 +205,55 @@ const TaskItem = (props) => {
         taskItem={taskItem}
         updateStatus={updateStatus}
       />
+
+      <div
+        className={
+          taskItem.status === TaskStatus.active
+            ? "bg-blue-800 px-4 m-0"
+            : taskItem.status === TaskStatus.fixed
+            ? "bg-red-800 px-4 m-0"
+            : taskItem.status === TaskStatus.completed
+            ? "bg-green-800 px-4 m-0"
+            : ""
+        }
+      >
+        <p className="text-sm font-medium leading-6 text-gray-50">Assign</p>
+        <div className="flex items-center gap-x-2">
+          <div className="mb-2">
+            <span className="text-4xl font-semibold text-white">
+              {taskItem.assigns.users.length}
+            </span>
+          </div>
+          <div className="items-center ml-2 break-all">
+            {taskItem.assigns.users.map((user) => {
+              return (
+                <div
+                  className="flex items-center mb-1"
+                  key={`asign-p-${taskItem.id}-${user.assignUserAddress}`}
+                >
+                  <img
+                    className={
+                      address === user.assignUserAddress
+                        ? "w-5 h-5 m-y-auto mr-2 rounded-full"
+                        : "w-5 h-5 m-y-auto mr-2 rounded-full"
+                    }
+                    src={user.iconUrl}
+                  />
+                  <p
+                    className={
+                      address === user.assignUserAddress
+                        ? "text-left text-sm text-gray-100 break-all"
+                        : "text-left text-xs text-gray-400 break-all"
+                    }
+                  >
+                    {user.assignUserAddress}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
       <div className="flex flex-1 flex-col p-4">
         <div className="flex justify-between">
           <div className="sr-only">Channel</div>
@@ -175,7 +273,38 @@ const TaskItem = (props) => {
                 key={`taskitem-${taskItem.id}-dev-${index}`}
               >
                 <div className="flex h-6 items-center">
-                  <input
+                  {taskItem.status === TaskStatus.active ? (
+                    <input
+                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                      id={`taskitem-${taskItem.id}-checkbox-${index}`}
+                      aria-describedby="comments-description"
+                      name={`taskitem-${taskItem.id}-checkbox-${index}`}
+                      type="checkbox"
+                      onChange={() => checkHandler(index)}
+                      checked={task.checked}
+                      disabled={taskItem.status >= TaskStatus.fixed}
+                    />
+                  ) : taskItem.status === TaskStatus.fixed ? (
+                    <PlayIcon
+                      className={
+                        task.checked
+                          ? "h-4 w-4 text-red-500"
+                          : "h-4 w-4 text-transparent"
+                      }
+                      aria-hidden="true"
+                    />
+                  ) : taskItem.status === TaskStatus.completed ? (
+                    <TrophyIcon
+                      className={
+                        task.checked
+                          ? "h-4 w-4 text-green-700"
+                          : "h-4 w-4 text-transparent"
+                      }
+                      aria-hidden="true"
+                    />
+                  ) : null}
+
+                  {/* <input
                     id={`taskitem-${taskItem.id}-checkbox-${index}`}
                     aria-describedby="comments-description"
                     name={`taskitem-${taskItem.id}-checkbox-${index}`}
@@ -184,7 +313,7 @@ const TaskItem = (props) => {
                       taskItem.status === TaskStatus.active
                         ? "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
                         : taskItem.status === TaskStatus.fixed
-                        ? "h-4 w-4 rounded border-gray-300 text-yellow-600 focus:ring-yellow-600"
+                        ? "h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-600"
                         : taskItem.status === TaskStatus.completed
                         ? "h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-600"
                         : ""
@@ -192,12 +321,16 @@ const TaskItem = (props) => {
                     onChange={() => checkHandler(index)}
                     checked={task.checked}
                     disabled={taskItem.status >= TaskStatus.fixed}
-                  />
+                  /> */}
                 </div>
                 <div className="ml-3 text-sm leading-6">
                   <label
                     htmlFor={`taskitem-${taskItem.id}-checkbox-${index}`}
-                    className="font-medium text-gray-900"
+                    className={
+                      task.checked || taskItem.status == TaskStatus.active
+                        ? "font-medium text-gray-900"
+                        : "font-medium text-gray-400"
+                    }
                   >
                     {task.name}
                   </label>{" "}

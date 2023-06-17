@@ -18,12 +18,42 @@ const getTasks = async (nextCursor = "") => {
     }
     const responseJson = await response.json();
 
+    const usersResults = await getUsers();
+
     const results = responseJson.results.map((item) => {
       const id = item.id;
       const guildId = item.properties.guildId.rich_text[0].plain_text;
       const channelId = item.properties.channelId.rich_text[0].plain_text;
       const messageId = item.properties.id.title[0].plain_text;
       const summary = item.properties.summary.rich_text[0].plain_text;
+      const assigns = {
+        users: item.properties.assigns.rollup.array
+          .map((data) => {
+            const result = JSON.parse(data.formula.string);
+            const target  = usersResults.users.find((user) => user.address == result.assignUserAddress)
+            if(target){
+              result.iconUrl = target.iconUrl
+              result.name = target.userName
+            }else{
+              result.iconUrl = ""
+              result.name = ""
+            }
+            return result;
+          })
+          .filter((assign) => assign.tasksIndexes.length > 0)
+      };
+
+      let indexes = {};
+      assigns.users.forEach((item) => {
+        item.tasksIndexes.forEach((index) => {
+          if (!indexes[index]) {
+            indexes[index] = [];
+          }
+          indexes[index] = [...indexes[index], item.assignUserAddress];
+        });
+      });
+
+      assigns.indexes = indexes;
 
       let status = TaskStatus.active;
       if (item.properties.status.select?.name === "fixed") {
@@ -54,6 +84,7 @@ const getTasks = async (nextCursor = "") => {
         summary,
         status,
         tasks,
+        assigns,
       };
     });
 
@@ -119,9 +150,8 @@ const getUsers = async (address = "") => {
       const id = item.id;
       const address = item.properties.walletAddress.title[0].plain_text;
       const userName = item.properties.userName.rich_text[0].plain_text;
-      const userId = item.properties.userId.rich_text[0].plain_text;
       const iconUrl = item.properties.iconUrl.rich_text[0].plain_text;
-      return { id, address, userId, userName, iconUrl };
+      return { id, address, userName, iconUrl };
     });
     return {
       users: results,
@@ -129,6 +159,7 @@ const getUsers = async (address = "") => {
       nextCursor: responseJson.next_cursor,
     };
   } catch (error) {
+    console.log(error.message)
     return [];
   }
 };
@@ -147,8 +178,6 @@ const addAssign = async (address, taskItem) => {
       indexes: indexes,
     };
 
-    console.log(requestData);
-
     //https://3emm6xaoyufyll6xdmocaxmrou0ogrfi.lambda-url.ap-northeast-1.on.aws/
     const response = await fetch(
       `https://notionmanager.ukishima.repl.co/assign`,
@@ -165,6 +194,9 @@ const addAssign = async (address, taskItem) => {
     if (!response) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    const usersResults = await getUsers(address);
+    return usersResults.users;
   } catch (error) {
     console.error(error);
     throw new Error("追加失敗", { caluse: error });
@@ -275,8 +307,7 @@ const mintAssignToken = async (address, taskItem) => {
       tasks: tasks,
     };
 
-    await updateStatus(taskItem,"fixed");
-
+    await updateStatus(taskItem, "fixed");
 
     const options = {
       method: "POST",
@@ -286,7 +317,7 @@ const mintAssignToken = async (address, taskItem) => {
       body: JSON.stringify(requestData),
     };
     const mintResponse = await fetch(
-      "https://3emm6xaoyufyll6xdmocaxmrou0ogrfi.lambda-url.ap-northeast-1.on.aws/",
+      "https://a5guh723j5wcy2ns7vopdfjcu40qukfn.lambda-url.ap-northeast-1.on.aws/",
       options
     );
 
@@ -351,7 +382,7 @@ const mintCompletionToken = async (address, taskItem) => {
     const usersInfo = await getUsers(address);
     const guildsInfo = await getGuilds(taskItem.guildId);
 
-    await updateStatus(taskItem,"completed");
+    await updateStatus(taskItem, "completed");
 
     const requestData = {
       status: "done",
@@ -377,7 +408,7 @@ const mintCompletionToken = async (address, taskItem) => {
       body: JSON.stringify(requestData),
     };
     const mintResponse = await fetch(
-      "https://3emm6xaoyufyll6xdmocaxmrou0ogrfi.lambda-url.ap-northeast-1.on.aws/",
+      "https://a5guh723j5wcy2ns7vopdfjcu40qukfn.lambda-url.ap-northeast-1.on.aws/",
       options
     );
 
@@ -392,7 +423,6 @@ const mintCompletionToken = async (address, taskItem) => {
 
 const updateStatus = async (taskItem, status) => {
   try {
-
     const requestData = {
       id: taskItem.id,
       status: status,
@@ -429,5 +459,5 @@ export {
   getAssign,
   mintAssignToken,
   mintCompletionToken,
-  updateStatus
+  updateStatus,
 };

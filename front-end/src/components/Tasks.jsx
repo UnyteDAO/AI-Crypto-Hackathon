@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import TaskItem from "./TaskItem";
 import { getAssign, getTasks } from "../modules/Notion.mjs";
+
 
 const Tasks = (props) => {
   const { address } = useAccount();
@@ -9,11 +10,11 @@ const Tasks = (props) => {
   const [displayData, setDisplayData] = useState([]);
   const [nextCursor, setNextCursor] = useState("");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const initializeTaskData = async () => {
       const result = await getTasks();
       const assignResult = await getAssign(address);
-      for(const assign of assignResult.tasks) {
+      for (const assign of assignResult.tasks) {
         const targetIndex = result.tasks.findIndex(
           (item) => item.id === assign.id
         );
@@ -22,7 +23,7 @@ const Tasks = (props) => {
             result.tasks[targetIndex].tasks[index].checked = true;
           }
         }
-      };
+      }
 
       setTaskData(result.tasks);
       setDisplayData(result.tasks);
@@ -31,12 +32,12 @@ const Tasks = (props) => {
     initializeTaskData();
   }, []);
 
-  useEffect(() => {
-    setDisplayData([]);
+  useLayoutEffect(() => {
+    setDisplayData((prev) => []);
     const initializeTaskData = async () => {
       const result = await getTasks();
       const assignResult = await getAssign(address);
-      for(const assign of assignResult.tasks) {
+      for (const assign of assignResult.tasks) {
         const targetIndex = result.tasks.findIndex(
           (item) => item.id === assign.id
         );
@@ -45,17 +46,16 @@ const Tasks = (props) => {
             result.tasks[targetIndex].tasks[index].checked = true;
           }
         }
-      };
+      }
 
       setTaskData(result.tasks);
       setDisplayData(result.tasks);
       setNextCursor(result.nextCursor);
     };
     initializeTaskData();
-  }, [address]);  
+  }, [address]);
 
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     const getNextTasks = async () => {
       const result = await getTasks(nextCursor);
       setTaskData((prevTasks) => [...prevTasks, ...result.tasks]);
@@ -69,7 +69,7 @@ const Tasks = (props) => {
     }
   }, [props.needNextTasks]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     //console.log("Call props change effect");
 
     const filteredData = taskData.filter((data) => {
@@ -113,6 +113,7 @@ const Tasks = (props) => {
             tasks={data.tasks}
             date={data.date}
             status={data.status}
+            assigns={data.assigns}
           />
         );
       })}

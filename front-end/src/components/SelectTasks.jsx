@@ -33,7 +33,8 @@ const SelectTasks = (props) => {
     context: "",
     isShow: false,
   });
-  const [isInMintAssignTokenProcess, setIsInMintAssignTokenProcess] = useState(false);
+  const [isInMintAssignTokenProcess, setIsInMintAssignTokenProcess] =
+    useState(false);
 
   const cancelButtonRef = useRef(null);
 
@@ -46,11 +47,11 @@ const SelectTasks = (props) => {
     setMintTaskItem(results);
   }, [props.isOpen]);
 
-  useEffect(() =>{
-    if(!open){
+  useEffect(() => {
+    if (!open) {
       props.callback(open);
     }
-  },[open])
+  }, [open]);
 
   const checkHandler = (index) => {
     const results = { ...mintTaskItem };
@@ -62,7 +63,9 @@ const SelectTasks = (props) => {
     setIsInMintAssignTokenProcess(true);
     const result = await mintAssignToken(address, mintTaskItem);
     if (result.txHash) {
-      console.log(`explorer: https://mumbai.polygonscan.com/tx/${result.txHash}`);
+      console.log(
+        `explorer: https://mumbai.polygonscan.com/tx/${result.txHash}`
+      );
     }
 
     setIsInMintAssignTokenProcess(false);
