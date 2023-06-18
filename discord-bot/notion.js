@@ -4,7 +4,7 @@ require("dotenv").config();
 const { getSummaryAndTask, getTaskType } = require("./openai");
 
 // タスクを「- 」で区切って配列にする関数
-const classifyTasks = async (tasks,summary) => {
+const classifyTasks = async (tasks, summary) => {
   const taskArr = tasks.split("\n");
   const tasksEdited = taskArr.map((item) => {
     return item.replace("- ", "");
@@ -243,6 +243,7 @@ const isStatusActive = async (FirstMessageId) => {
     return null;
   }
 };
+
 const updatePage = async (pageId, history, userIds) => {
   let newHistory = history;
   const formattedArr = newHistory.map((item, index, array) => {
