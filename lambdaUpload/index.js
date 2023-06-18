@@ -116,9 +116,9 @@ exports.handler = async function (event, context) {
 	// データをipfsにアップロード
 	let hash = "";
 	if(status == "doing"){
-		hash = "QmXFMDrZTBoAVHUoKCGx6HiRwyrg5iBsj1zRo1pn3uwm8N"
+		hash = "ipfs://QmR61viQsz52zxf9tB7TT9csuxxK6c5pq7hTgCXAytv8Eo"
 	}else if(status == "done"){
-		hash = "QmabyySPzFQsEVFtmWy3dLhXsvFbQRMfmgZkmAnXaX3S6e"
+		hash = "ipfs://QmSHU6MGq5fbVYFVodTRK1meaTugS6agAAWNn9SQQ78X9h"
 	}
 	// await pinata.pinFromFS(path).then((result) => {
 	// 	//handle results here
@@ -149,7 +149,10 @@ exports.handler = async function (event, context) {
     }
 
 	// 秘密鍵からアカウントの作成
-	const provider = new ethers.providers.JsonRpcProvider("https://polygon-mumbai.g.alchemy.com/v2/OYM4nSdwayU_AlLiq50U7TFXnKqXXcuL");
+	// mumbai
+	// const provider = new ethers.providers.JsonRpcProvider("https://polygon-mumbai.g.alchemy.com/v2/OYM4nSdwayU_AlLiq50U7TFXnKqXXcuL");
+	// astar
+	const provider = new ethers.providers.JsonRpcProvider("https://evm.astar.network");
 	const privateKey = process.env.PRIVATE_KEY;
 	const walletWithProvider = new ethers.Wallet(privateKey, provider);
 
@@ -164,6 +167,7 @@ exports.handler = async function (event, context) {
 	let txStatus = "";
 	let txHash = "";
 	let message = "";
+	console.log(_taskIds, _documentIds, _ipfsLinks)
 	try {
 		const txn = await connectedContract.mintBatch(
 			owners,

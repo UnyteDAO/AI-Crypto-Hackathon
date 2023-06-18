@@ -18,7 +18,7 @@ module.exports = {
       accounts: [process.env.PRIVATE_KEY],
     },
     astar: {
-      url: "https://astar-mainnet.g.alchemy.com/v2/fplVxEKlCS0sSnG4SJJ-L10PfI5TuOw3",
+      url: "https://evm.astar.network",
       accounts: [process.env.PRIVATE_KEY],
     },
   },
