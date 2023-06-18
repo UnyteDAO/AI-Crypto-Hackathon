@@ -3,6 +3,25 @@ const crypto = require("crypto");
 require("dotenv").config();
 const { getSummaryAndTask, getTaskType } = require("./openai");
 
+// タスクを「- 」で区切って配列にする関数
+const classifyTasks = async (tasks,summary) => {
+  const taskArr = tasks.split("\n");
+  const tasksEdited = taskArr.map((item) => {
+    return item.replace("- ", "");
+  });
+  // taskごとにタスクタイプを取得し、レスポンスに追加
+  const response = [];
+  for (let i = 0; i < tasksEdited.length; i++) {
+    const taskType = await getTaskType(tasksEdited[i], summary);
+    const json = {
+      name: tasksEdited[i],
+      type: taskType,
+    };
+    response.push(json);
+  }
+  return response;
+};
+
 const createNewPage = async (message, FirstMessageId, history, userIds) => {
   let newHistory = history;
   const formattedArr = newHistory.map((item, index, array) => {
@@ -13,7 +32,8 @@ const createNewPage = async (message, FirstMessageId, history, userIds) => {
   });
   newHistory = formattedArr.join("\n");
   const sammaryAndTask = await getSummaryAndTask(newHistory); // [summary, task]
-  const taskType = await getTaskType(sammaryAndTask[1], sammaryAndTask[0]);
+  // タスクを「- 」で区切って配列にし、タスクタイプを取得
+  const taskType = await classifyTasks(sammaryAndTask[1], sammaryAndTask[0]);
 
   const options = {
     method: "POST",
@@ -116,9 +136,13 @@ const createNewPage = async (message, FirstMessageId, history, userIds) => {
           ],
         },
         GPTTaskType: {
-          select: {
-            name: taskType,
-          },
+          rich_text: [
+            {
+              text: {
+                content: JSON.stringify(taskType),
+              },
+            },
+          ],
         },
         CreatedAt: {
           rich_text: [
@@ -229,7 +253,8 @@ const updatePage = async (pageId, history, userIds) => {
   });
   newHistory = formattedArr.join("\n");
   const sammaryAndTask = await getSummaryAndTask(history); // [summary, task]
-  const taskType = await getTaskType(sammaryAndTask[1], sammaryAndTask[0]);
+  // タスクを「- 」で区切って配列にし、タスクタイプを取得
+  const taskType = await classifyTasks(sammaryAndTask[1], sammaryAndTask[0]);
 
   const options = {
     method: "PATCH",
@@ -279,9 +304,13 @@ const updatePage = async (pageId, history, userIds) => {
           ],
         },
         GPTTaskType: {
-          select: {
-            name: taskType,
-          },
+          rich_text: [
+            {
+              text: {
+                content: JSON.stringify(taskType),
+              },
+            },
+          ],
         },
         UpdatedAt: {
           rich_text: [

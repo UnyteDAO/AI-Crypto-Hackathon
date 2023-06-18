@@ -29,9 +29,11 @@ const getSummaryAndTask = async (rawText) => {
 const getTaskType = async (task, summary) => {
   const choices = [
     "開発",
-    "ビジネス",
+    "BizDev",
     "デザイン",
     "コミュニティマネジメント",
+    "マーケティング",
+    "営業",
     "その他",
   ];
   const gptRole = "user";
