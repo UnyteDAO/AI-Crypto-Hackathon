@@ -7,6 +7,7 @@ const Notification = (props) => {
   const [show, setShow] = useState({
     header: "",
     context: "",
+    txHash: null,
     isShow: false,
     isSuccess: true,
     callback: null,
@@ -14,21 +15,22 @@ const Notification = (props) => {
 
   useEffect(() => {
     setShow({ ...props });
-    if(props.isShow){
+    if (props.isShow) {
       setTimeout(() => {
         props.callback({
           header: "",
           context: "",
+          txHash: null,
           isShow: false,
-          isSuccess: true,
+          isSuccess: props.isSuccess,
           callback: null,
-        });  
-      }, 5000)  
+        });
+      }, 30000);
     }
   }, [props.isShow]);
 
   return (
-    <div className="z-50">
+    <div className="z-50 border border-none">
       <div
         aria-live="assertive"
         className="pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6"
@@ -67,16 +69,32 @@ const Notification = (props) => {
                     <p className="mt-1 text-sm text-gray-500 text-left">
                       {show.context}
                     </p>
+                    {show.txHash !== "" ? (
+                      <a
+                        className="text-sm underline text-blue-600"
+                        href={`https://mumbai.polygonscan.com/tx/${show.txHash}`}
+                        target="_blank"
+                      >
+                        {`${show.txHash?.substring(0,6)}...${show.txHash?.substring(show.txHash.length -4)}`}
+                      </a>
+                    ) : null}
                   </div>
                   <div className="ml-4 flex flex-shrink-0">
                     <button
                       type="button"
                       className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                       onClick={() => {
-                        setShow({ header: "", context: "", isShow: false, isSuccess: show.isSuccess});
+                        setShow({
+                          header: "",
+                          context: "",
+                          txHash: "",
+                          isShow: false,
+                          isSuccess: show.isSuccess,
+                        });
                         show.callback({
                           header: "",
                           context: "",
+                          txHash: "",
                           isShow: false,
                           isSuccess: show.isSuccess,
                         });
