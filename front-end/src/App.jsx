@@ -236,7 +236,7 @@ const App = () => {
                                   >
                                     <input
                                       id={`filter-mobile-${section.id}-${optionIdx}`}
-                                      onChange={() => checkHandler(optionIdx)}
+                                      onChange={() => checkHandler(section.id,optionIdx)}
                                       name={`${section.id}[]`}
                                       defaultValue={option.value}
                                       type="checkbox"
