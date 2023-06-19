@@ -27,8 +27,8 @@ const createNewPage = async (message, FirstMessageId, history, userIds) => {
   const formattedArr = newHistory.map((item, index, array) => {
     const [key, value] = item.split(": ");
     return index < array.length - 1
-      ? `\`${key}\`: \`${value}\`\n-----`
-      : `\`${key}\`: \`${value}\``;
+      ? key + ": " + value + "\n-----"
+      : key + ": " + value;
   });
   newHistory = formattedArr.join("\n");
   const sammaryAndTask = await getSummaryAndTask(newHistory); // [summary, task]
@@ -103,7 +103,7 @@ const createNewPage = async (message, FirstMessageId, history, userIds) => {
           rich_text: [
             {
               text: {
-                content: newHistory,
+                content: String(newHistory),
               },
             },
           ],
@@ -161,8 +161,8 @@ const createNewPage = async (message, FirstMessageId, history, userIds) => {
   };
   try {
     const response = await axios.request(options);
-    console.log("success");
-    console.log(response.data);
+    console.log("[result] success: createNewPage");
+    console.log(response.data.id);
   } catch (error) {
     console.error(error);
   }
@@ -189,7 +189,7 @@ const isFirstMessageIdExists = async (FirstMessageId) => {
   };
   try {
     const response = await axios.request(options);
-    console.log("success");
+    console.log("[result] success: isFirstMessageIdExists");
     return response.data &&
       response.data.results &&
       response.data.results.length === 0
@@ -232,7 +232,7 @@ const isStatusActive = async (FirstMessageId) => {
   };
   try {
     const response = await axios.request(options);
-    console.log("success");
+    console.log("[result] success: isStatusActive");
     return response.data &&
       response.data.results &&
       response.data.results.length === 0
@@ -249,11 +249,11 @@ const updatePage = async (pageId, history, userIds) => {
   const formattedArr = newHistory.map((item, index, array) => {
     const [key, value] = item.split(": ");
     return index < array.length - 1
-      ? `\`${key}\`: \`${value}\`\n-----`
-      : `\`${key}\`: \`${value}\``;
+      ? key + ": " + value + "\n-----"
+      : key + ": " + value;
   });
   newHistory = formattedArr.join("\n");
-  const sammaryAndTask = await getSummaryAndTask(history); // [summary, task]
+  const sammaryAndTask = await getSummaryAndTask(newHistory); // [summary, task]
   // タスクを「- 」で区切って配列にし、タスクタイプを取得
   const taskType = await classifyTasks(sammaryAndTask[1], sammaryAndTask[0]);
 
@@ -272,7 +272,7 @@ const updatePage = async (pageId, history, userIds) => {
           rich_text: [
             {
               text: {
-                content: newHistory,
+                content: String(newHistory),
               },
             },
           ],
@@ -330,8 +330,8 @@ const updatePage = async (pageId, history, userIds) => {
   };
   try {
     const response = await axios.request(options);
-    console.log("success");
-    console.log(response.data);
+    console.log("[result] success: updatePage");
+    console.log(response.data.id);
   } catch (error) {
     console.error(error);
   }
