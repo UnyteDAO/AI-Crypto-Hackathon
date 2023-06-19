@@ -4,26 +4,69 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
+const createGPTSummaryRecursive = async (modelPromptSummary, retries = 10) => {
+  if (retries <= 0) {
+    throw new Error("Retry limit exceeded for createGPTSumary");
+  }
+  try {
+    return await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: modelPromptSummary }],
+    });
+  } catch (error) {
+    console.log("createGPTSumary error: " + error);
+    return createGPTSummaryRecursive(modelPromptSummary, retries - 1);
+  }
+};
+
+const createGPTTaskRecursive = async (modelPromptTask, retries = 10) => {
+  if (retries <= 0) {
+    throw new Error("Retry limit exceeded for createGPTTask");
+  }
+  try {
+    return await await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: modelPromptTask }],
+    });
+  } catch (error) {
+    console.log("createGPTTask error: " + error);
+    return createGPTTaskRecursive(modelPromptTask, retries - 1);
+  }
+};
+
+const createChatCompletionRecursive = async (model, messages, retries = 10) => {
+  if (retries <= 0) {
+    throw new Error("Retry limit exceeded for createChatCompletion");
+  }
+  try {
+    return await openai.createChatCompletion({ model, messages });
+  } catch (error) {
+    console.log("createChatCompletion error: " + error);
+    return createChatCompletionRecursive(model, messages, retries - 1);
+  }
+};
+
 const getSummaryAndTask = async (rawText) => {
-  // モデルに渡すプロンプトを作成する
-  const modelPromptSummary = `chatlog: ${rawText}\n\n{chatlog}の要約:`;
+  // prompts
+  const modelPromptSummary = `chatlog: ${rawText}\n\n{chatlog}の要約（仕様：日本語、誰が何を言ったか・実行したかを明確に）：`;
+  const modelPromptTask = `chatlog: ${rawText}\n\n{chatlog}に含まれる「今後」行うTo do(仕様：日本語、箇条書き、既に完了済みの内容や文章から読み取れる内容以上のことはTo doに含めずに)：`;
 
-  // モデルに問い合わせる
-  const completionSummary = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: modelPromptSummary }],
-  });
+  let completionSummary = null;
+  let completionTask = null;
 
-  const modelPromptTask = `chatlog: ${rawText}\n\n{chatlog}を受け生まれたチームとしてのタスク(箇条書き):`;
-  const completionTask = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: modelPromptTask }],
-  });
+  try {
+    completionSummary = await createGPTSummaryRecursive(modelPromptSummary);
+    completionTask = await createGPTTaskRecursive(modelPromptTask);
+  } catch (error) {
+    console.error("getSummaryAndTask error: " + error);
+  }
 
-  return [
-    completionSummary.data.choices[0].message.content,
-    completionTask.data.choices[0].message.content,
-  ];
+  return completionSummary.data && completionTask.data
+    ? [
+        completionSummary.data.choices[0].message.content,
+        completionTask.data.choices[0].message.content,
+      ]
+    : [completionSummary, completionTask];
 };
 
 const getTaskType = async (task, summary) => {
@@ -43,12 +86,13 @@ const getTaskType = async (task, summary) => {
     ", "
   )}\n\n最も近い選択肢:`;
 
-  const completion = await openai.createChatCompletion({
-    model: gptModel,
-    messages: [{ role: gptRole, content: modelPrompt }],
-  });
+  const completion = await createChatCompletionRecursive(gptModel, [
+    { role: gptRole, content: modelPrompt },
+  ]);
 
-  return completion.data.choices[0].message.content;
+  return completion.data
+    ? completion.data.choices[0].message.content
+    : completion;
 };
 
 module.exports = { getSummaryAndTask, getTaskType };
