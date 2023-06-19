@@ -102,7 +102,7 @@ const getTasks = async (nextCursor = "") => {
         //   }
         // }
   
-        const date = item.properties.CreatedAt.rich_text[0].plain_text;
+        const date = new Date(parseInt(item.properties.CreatedAt.rich_text[0].plain_text)).toLocaleString();
         return {
           id,
           guildId,
@@ -152,7 +152,8 @@ const getGuilds = async (guildId = "") => {
       const guildId = item.properties.guildId.title[0].plain_text;
       const guildName = item.properties.name.rich_text[0].plain_text;
       const iconUrl = item.properties.iconUrl.rich_text[0].plain_text;
-      return { id, guildId, guildName, iconUrl };
+      const contract = JSON.parse(item.properties.contract.rich_text[0].plain_text);
+      return { id, guildId, guildName, iconUrl,contract };
     });
     return {
       guilds: results,
@@ -160,6 +161,7 @@ const getGuilds = async (guildId = "") => {
       nextCursor: responseJson.next_cursor,
     };
   } catch (error) {
+    console.error(error)
     return [];
   }
 };
@@ -179,7 +181,6 @@ const getUsers = async (address = "") => {
     }
 
     const responseJson = await response.json();
-    console.log(responseJson)
     const results = responseJson.results.map((item) => {
       try{
         const id = item.id;
@@ -188,7 +189,7 @@ const getUsers = async (address = "") => {
         const iconUrl = item.properties.iconUrl.rich_text[0].plain_text;
         return { id, address, userName, iconUrl };  
       }catch(error){
-        console.log(item,error)
+        console.error(item,error)
       }
     }).filter(Boolean);
     return {
@@ -197,7 +198,7 @@ const getUsers = async (address = "") => {
       nextCursor: responseJson.next_cursor,
     };
   } catch (error) {
-    console.log(error.message);
+    console.error(error.message);
     return [];
   }
 };
@@ -307,7 +308,6 @@ const mintAssignToken = async (address, taskItem) => {
         }
       }
     });
-    console.log("Reciever", recievers);
 
     let tasks = [];
     for (const [index, address] of Object.entries(recievers)) {
@@ -433,7 +433,6 @@ const mintCompletionToken = async (address, taskItem) => {
       tasks: tasks,
     };
 
-    console.log(requestData);
     const options = {
       method: "POST",
       headers: {
@@ -464,9 +463,6 @@ const updateStatus = async (taskItem, status, skips) => {
       skips: skips,
     };
 
-    console.log(requestData);
-
-    //https://3emm6xaoyufyll6xdmocaxmrou0ogrfi.lambda-url.ap-northeast-1.on.aws/
     const response = await fetch(
       `https://notionmanager.ukishima.repl.co/status`,
       {
@@ -489,6 +485,7 @@ const updateStatus = async (taskItem, status, skips) => {
 };
 
 export {
+  getGuilds,
   getTasks,
   getUsers,
   addAssign,

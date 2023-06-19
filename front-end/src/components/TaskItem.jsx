@@ -48,7 +48,6 @@ const TaskItem = (props) => {
     useState(false);
 
   useEffect(() => {
-    console.log("props", props);
     setTaskItem((prev) => ({ ...prev }, { ...props }));
   }, []);
 
@@ -76,7 +75,11 @@ const TaskItem = (props) => {
         return task.checked;
       });
 
-      const assignedUser = await addAssign(address, taskItem);
+      const result = await addAssign(address, taskItem);
+      const icon =
+        result.length !== 0
+          ? result[0].iconUrl
+          : "https://upload.wikimedia.org/wikipedia/commons/b/bc/Unknown_person.jpg";
 
       setTaskItem((prev) => {
         let result = { ...prev };
@@ -98,19 +101,17 @@ const TaskItem = (props) => {
             {
               assignUserAddress: address,
               tasksIndexes: tasksIndexes,
-              iconUrl: assignedUser[0].iconUrl,
+              iconUrl: icon
             },
           ];
         } else {
-          result.assigns.users = [];
+          //result.assigns.users = [];
         }
 
-        console.log("Assign Users", result.assigns.users);
 
         let indexes = {};
         if (result.assigns.users) {
           result.assigns.users.forEach((item) => {
-            console.log("item", item);
             item.tasksIndexes?.forEach((index) => {
               if (!indexes[index]) {
                 indexes[index] = [];
@@ -126,7 +127,6 @@ const TaskItem = (props) => {
             });
           });
         }
-        console.log(indexes);
 
         result.assigns.indexes = indexes;
 
@@ -135,7 +135,6 @@ const TaskItem = (props) => {
             (item) => item.assignUserAddress != address
           );
         }
-        console.log(result);
         return result;
       });
 
@@ -275,7 +274,11 @@ const TaskItem = (props) => {
                         ? "w-5 h-5 m-y-auto mr-2 rounded-full"
                         : "w-5 h-5 m-y-auto mr-2 rounded-full"
                     }
-                    src={user.iconUrl}
+                    src={
+                      user.iconUrl === ""
+                        ? "https://upload.wikimedia.org/wikipedia/commons/b/bc/Unknown_person.jpg"
+                        : user.iconUrl
+                    }
                   />
                   <p
                     className={

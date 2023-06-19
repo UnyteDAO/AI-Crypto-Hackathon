@@ -11,6 +11,10 @@ import {
 
 import Tasks from "./components/Tasks";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
+
+import { getGuilds } from "./modules/Notion.mjs";
+import { isOwner } from "./modules/Chain.mjs";
 
 const defaultSortOptions = [
   { name: "Newest", href: "#", current: true },
@@ -20,15 +24,44 @@ const defaultSortOptions = [
 
 const defaultFilters = [
   {
+    id: "Guild",
+    name: "Guild",
+    options: [
+      {
+        value: "0x1",
+        label: "AI+Crypt Hackathon",
+        icon: "",
+        checked: true,
+      },
+      { value: "0x2", label: "UnyteDAO", checked: true },
+    ],
+  },
+  {
     id: "Channel",
     name: "Channel",
     options: [
+      {
+        value: "1118546453837652159",
+        label: "developing-product",
+        checked: true,
+      },
       { value: "1044848947497291826", label: "Biz General", checked: true },
       { value: "967663391500013639", label: "BizDev Unyte", checked: true },
-      { value: "1080430945271824395", label: "UNCHAIN 進捗", checked: true },
       { value: "Channel4", label: "Channel4", checked: true },
       { value: "Channel5", label: "Channel5", checked: true },
       { value: "Channel6", label: "Channel6", checked: true },
+    ],
+  },
+  {
+    id: "Type",
+    name: "Type",
+    options: [
+      { value: "開発", label: "開発", checked: true },
+      { value: "デザイン", label: "デザイン", checked: true },
+      { value: "BizDev", label: "BizDev", checked: true },
+      { value: "コミュニティ", label: "コミュニティ", checked: true },
+      { value: "マーケティング", label: "マーケティング", checked: true },
+      { value: "営業", label: "営業", checked: true },
     ],
   },
 ];
@@ -39,12 +72,48 @@ function classNames(...classes) {
 
 const App = () => {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [chanelFilters, setChanelFilters] = useState(defaultFilters);
+  const [filters, setFilters] = useState(defaultFilters);
   const [sortOptions, setSortOptions] = useState(defaultSortOptions);
   const [searchText, setSearchText] = useState("");
   const [needNextTasks, setNeedNextTasks] = useState(false);
+  const { address } = useAccount();
 
   useEffect(() => {
+    getGuilds().then((response) => {
+      Promise.all(
+        response.guilds.map(async (guild) => {
+          if (guild.contract.chain === 0) {
+            return {
+              value: guild.guildId,
+              label: guild.guildName,
+              icon: guild.iconUrl,
+              checked: true,
+            };
+          } else {
+            const check = await isOwner(
+              address,
+              guild.contract.address,
+              guild.contract.chain
+            );
+            if (check) {
+              return {
+                value: guild.guildId,
+                label: guild.guildName,
+                icon: guild.iconUrl,
+                checked: true,
+              };
+            }
+          }
+        })
+      ).then((options) => {
+        setFilters((prev) => {
+          const filters = [...prev];
+          filters[0].options = options.filter((v) => v != undefined);
+          return filters;
+        });
+      });
+    });
+
     window.addEventListener("scroll", scrollHandler);
     return () => window.removeEventListener("scroll", scrollHandler);
   }, []);
@@ -63,10 +132,16 @@ const App = () => {
     setSortOptions(result);
   };
 
-  const checkHandler = (index) => {
-    const result = [...chanelFilters];
-    result[0].options[index].checked = !result[0].options[index].checked;
-    setChanelFilters(result);
+  const checkHandler = (sectionId, index) => {
+    const result = [...filters];
+    if (sectionId === "Channel") {
+      result[1].options[index].checked = !result[1].options[index].checked;
+    } else if (sectionId === "Guild") {
+      result[0].options[index].checked = !result[0].options[index].checked;
+    } else if (sectionId === "Type") {
+      result[2].options[index].checked = !result[2].options[index].checked;
+    }
+    setFilters(result);
   };
 
   const searchHandler = (event) => {
@@ -123,7 +198,7 @@ const App = () => {
                   {/* Filters */}
                   <form className="mt-4 border-t border-gray-200">
                     <h3 className="sr-only">Categories</h3>
-                    {chanelFilters.map((section) => (
+                    {filters.map((section) => (
                       <Disclosure
                         as="div"
                         key={section.id}
@@ -167,9 +242,12 @@ const App = () => {
                                       defaultChecked={option.checked}
                                       className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                     />
+                                    <div className="h-6 w-6 ml-1">
+                                      <img src={option.icon}></img>
+                                    </div>
                                     <label
                                       htmlFor={`filter-mobile-${section.id}-${optionIdx}`}
-                                      className="ml-3 min-w-0 flex-1 text-gray-500"
+                                      className="ml-1 min-w-0 flex-1 text-gray-500"
                                     >
                                       {option.label}
                                     </label>
@@ -289,7 +367,7 @@ const App = () => {
             <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-8">
               {/* Filters */}
               <form className="hidden lg:block">
-                {chanelFilters.map((section) => (
+                {filters.map((section) => (
                   <Disclosure
                     as="div"
                     key={section.id}
@@ -326,20 +404,25 @@ const App = () => {
                             {section.options.map((option, optionIdx) => (
                               <div
                                 key={option.value}
-                                className="flex items-center"
+                                className="flex items-center justify-start"
                               >
                                 <input
                                   id={`filter-${section.id}-${optionIdx}`}
-                                  onChange={() => checkHandler(optionIdx)}
+                                  onChange={() =>
+                                    checkHandler(section.id, optionIdx)
+                                  }
                                   name={`${section.id}[]`}
                                   defaultValue={option.value}
                                   type="checkbox"
                                   defaultChecked={option.checked}
                                   className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                 />
+                                <div className="flex ml-3 w-8 items-center justify-start">
+                                  <img className="w-4 h-4" src={option.icon}></img>
+                                </div>
                                 <label
                                   htmlFor={`filter-${section.id}-${optionIdx}`}
-                                  className="ml-3 text-sm text-gray-600"
+                                  className="ml-1 text-sm text-gray-600 justify-start"
                                 >
                                   {option.label}
                                 </label>
@@ -355,7 +438,7 @@ const App = () => {
 
               <div className="lg:col-span-7">
                 <Tasks
-                  filters={chanelFilters[0].options}
+                  filters={filters}
                   sortOptions={sortOptions}
                   needNextTasks={needNextTasks}
                   searchText={searchText}

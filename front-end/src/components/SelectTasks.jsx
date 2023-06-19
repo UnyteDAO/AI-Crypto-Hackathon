@@ -63,7 +63,6 @@ const SelectTasks = (props) => {
 
   const mintButtonClickHandler = async () => {
     setIsInMintAssignTokenProcess(true);
-    console.log(mintTaskItem);
     const result = await mintAssignToken(address, mintTaskItem);
     if (result.txHash) {
       console.log(
@@ -77,9 +76,7 @@ const SelectTasks = (props) => {
       mintedTaskItem.status = TaskStatus.fixed;
       mintedTaskItem.skips = result.skips;
       mintedTaskItem.tasks.map((task, index) => {
-        console.log(index,result.skips)
         if (result.skips.includes(index)) {
-          console.log("skips")
           mintedTaskItem.tasks[index].checked = false;
         }
       });
