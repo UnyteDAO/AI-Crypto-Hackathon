@@ -28,9 +28,11 @@ const wagmiConfig = createConfig({
 });
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <WagmiConfig config={wagmiConfig}>
-    <RainbowKitProvider modalSize="compact" chains={chains}>
-      <App />
-    </RainbowKitProvider>
-  </WagmiConfig>
+  <>
+    <WagmiConfig config={wagmiConfig}>
+      <RainbowKitProvider modalSize="compact" chains={chains}>
+        <App />
+      </RainbowKitProvider>
+    </WagmiConfig>
+  </>
 );

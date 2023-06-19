@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import TaskItem from "./TaskItem";
 import { getAssign, getTasks } from "../modules/Notion.mjs";
@@ -10,7 +10,7 @@ const Tasks = (props) => {
   const [displayData, setDisplayData] = useState([]);
   const [nextCursor, setNextCursor] = useState("");
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const initializeTaskData = async () => {
       const result = await getTasks();
       const assignResult = await getAssign(address);
@@ -24,40 +24,41 @@ const Tasks = (props) => {
           }
         }
       }
-
-      setTaskData(result.tasks);
-      setDisplayData(result.tasks);
+      console.log(result.tasks)
+      setTaskData([...result.tasks]);
+      setDisplayData([...result.tasks]);
       setNextCursor(result.nextCursor);
     };
     initializeTaskData();
   }, []);
 
-  useLayoutEffect(() => {
-    setDisplayData((prev) => []);
-    const initializeTaskData = async () => {
-      const result = await getTasks();
-      const assignResult = await getAssign(address);
-      for (const assign of assignResult.tasks) {
-        const targetIndex = result.tasks.findIndex(
-          (item) => item.id === assign.id
-        );
-        if (targetIndex > -1) {
-          for (const index of assign.taskIndexes) {
-            result.tasks[targetIndex].tasks[index].checked = true;
-          }
-        }
-      }
+  // useEffect(() => {
+  //   setDisplayData((prev) => []);
+  //   const initializeTaskData = async () => {
+  //     const result = await getTasks();
+  //     const assignResult = await getAssign(address);
+  //     for (const assign of assignResult.tasks) {
+  //       const targetIndex = result.tasks.findIndex(
+  //         (item) => item.id === assign.id
+  //       );
+  //       if (targetIndex > -1) {
+  //         for (const index of assign.taskIndexes) {
+  //           result.tasks[targetIndex].tasks[index].checked = true;
+  //         }
+  //       }
+  //     }
 
-      setTaskData(result.tasks);
-      setDisplayData(result.tasks);
-      setNextCursor(result.nextCursor);
-    };
-    initializeTaskData();
-  }, [address]);
+  //     setTaskData(result.tasks);
+  //     setDisplayData(result.tasks);
+  //     setNextCursor(result.nextCursor);
+  //   };
+  //   initializeTaskData();
+  // }, [address]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const getNextTasks = async () => {
       const result = await getTasks(nextCursor);
+      console.log(result)
       setTaskData((prevTasks) => [...prevTasks, ...result.tasks]);
       setDisplayData((prevTasks) => [...prevTasks, ...result.tasks]);
       setNextCursor(result.nextCursor);
@@ -69,38 +70,39 @@ const Tasks = (props) => {
     }
   }, [props.needNextTasks]);
 
-  useLayoutEffect(() => {
-    //console.log("Call props change effect");
+  // useEffect(() => {
+  //   //console.log("Call props change effect");
 
-    const filteredData = taskData.filter((data) => {
-      const isChannelChecked = props.filters.some(
-        (item) =>
-          data.channelId === item.value &&
-          item.checked &&
-          data.summary.toLowerCase().includes(props.searchText.toLowerCase())
-      );
-      return isChannelChecked;
-    });
+  //   const filteredData = taskData.filter((data) => {
+  //     const isChannelChecked = props.filters.some(
+  //       (item) =>
+  //         data.channelId === item.value &&
+  //         item.checked &&
+  //         data.summary.toLowerCase().includes(props.searchText.toLowerCase())
+  //     );
+  //     return isChannelChecked;
+  //   });
 
-    let sortedData;
-    if (props.sortOptions[0].current) {
-      //console.log("Sort by newest");
-      sortedData = [...filteredData].sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-      );
-    } else if (props.sortOptions[1].current) {
-      //console.log("Sort by oldest");
-      sortedData = [...filteredData].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
-    } else {
-      sortedData = [...filteredData];
-    }
-    setDisplayData(sortedData);
-  }, [props, taskData]);
+  //   let sortedData;
+  //   if (props.sortOptions[0].current) {
+  //     //console.log("Sort by newest");
+  //     sortedData = [...filteredData].sort(
+  //       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  //     );
+  //   } else if (props.sortOptions[1].current) {
+  //     //console.log("Sort by oldest");
+  //     sortedData = [...filteredData].sort(
+  //       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  //     );
+  //   } else {
+  //     sortedData = [...filteredData];
+  //   }
+  //   setDisplayData(sortedData);
+  // }, [props, taskData]);
 
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
+      {console.log("displayData",displayData)}
       {[...displayData].map((data, index) => {
         return (
           <TaskItem
@@ -114,6 +116,7 @@ const Tasks = (props) => {
             date={data.date}
             status={data.status}
             assigns={data.assigns}
+            skips={data.skips}
           />
         );
       })}

@@ -21,72 +21,105 @@ const getTasks = async (nextCursor = "") => {
     const usersResults = await getUsers();
 
     const results = responseJson.results.map((item) => {
-      const id = item.id;
-      const guildId = item.properties.guildId.rich_text[0].plain_text;
-      const channelId = item.properties.channelId.rich_text[0].plain_text;
-      const messageId = item.properties.id.title[0].plain_text;
-      const summary = item.properties.summary.rich_text[0].plain_text;
-      const assigns = {
-        users: item.properties.assigns.rollup.array
-          .map((data) => {
-            const result = JSON.parse(data.formula.string);
-            const target  = usersResults.users.find((user) => user.address == result.assignUserAddress)
-            if(target){
-              result.iconUrl = target.iconUrl
-              result.name = target.userName
-            }else{
-              result.iconUrl = ""
-              result.name = ""
-            }
-            return result;
-          })
-          .filter((assign) => assign.tasksIndexes.length > 0)
-      };
-
-      let indexes = {};
-      assigns.users.forEach((item) => {
-        item.tasksIndexes.forEach((index) => {
-          if (!indexes[index]) {
-            indexes[index] = [];
+      try{
+        const id = item.id;
+        const guildId = item.properties.GuildId.rich_text[0].plain_text;
+        const channelId = item.properties.ChannelId.rich_text[0].plain_text;
+        const messageId = item.properties.FirstMessageId.rich_text[0].plain_text;
+        const summary = item.properties.GPTSummary.rich_text[0].plain_text;
+        const tasks = JSON.parse(item.properties.GPTTaskType.rich_text[0].plain_text);
+        for(const task of tasks){
+          task.checked = false;
+          if(!["開発","デザイン","BizDev","コミュニティ","マーケティング","営業"].includes(task.type)){
+            task.type="その他"
           }
-          indexes[index] = [...indexes[index], item.assignUserAddress];
-        });
-      });
-
-      assigns.indexes = indexes;
-
-      let status = TaskStatus.active;
-      if (item.properties.status.select?.name === "fixed") {
-        status = TaskStatus.fixed;
-      } else if (item.properties.status.select?.name === "completed") {
-        status = TaskStatus.completed;
-      }
-
-      let tasks = [];
-      const regx = /- \[ \] (.+)\n?/g;
-      const matches = item.properties.tasks.rich_text[0].plain_text.match(regx);
-      if (matches) {
-        for (const match of matches) {
-          tasks = [
-            ...tasks,
-            { name: match.replace("- [ ] ", ""), checked: false },
-          ];
         }
+        
+        const skips = item.properties.skips.multi_select.map((skip) => {
+          return parseInt(skip.name);
+        });
+        const assigns = {
+          users: item.properties.assigns.rollup.array
+            .map((data) => {
+              if (data.formula.string) {
+                const result = JSON.parse(data.formula.string);
+  
+                result.tasksIndexes = result.tasksIndexes.filter((index) => {
+                  return !skips.includes(index);
+                });
+  
+                const target = usersResults.users.find(
+                  (user) => user.address == result.assignUserAddress
+                );
+                if (target) {
+                  result.iconUrl = target.iconUrl;
+                  result.name = target.userName;
+                } else {
+                  result.iconUrl = "";
+                  result.name = "";
+                }
+                return result;
+              }
+            })
+            .filter((assign) => assign.tasksIndexes.length > 0),
+        };
+  
+        let indexes = {};
+        assigns.users.forEach((item) => {
+          item.tasksIndexes.forEach((index) => {
+            if (!indexes[index]) {
+              indexes[index] = [];
+            }
+            indexes[index] = [
+              ...indexes[index],
+              {
+                assignUserAddress: item.assignUserAddress,
+                iconUrl: item.iconUrl,
+                name: item.name,
+              },
+            ];
+          });
+        });
+  
+        assigns.indexes = indexes;
+  
+        let status = TaskStatus.active;
+        if (item.properties.Status.select?.name === "fixed") {
+          status = TaskStatus.fixed;
+        } else if (item.properties.Status.select?.name === "completed") {
+          status = TaskStatus.completed;
+        }
+  
+        // let tasks = [];
+        // const regx = /- \[ \] (.+)\n?/g;
+        // const matches = item.properties.tasks.rich_text[0].plain_text.match(regx);
+        // if (matches) {
+        //   for (const match of matches) {
+        //     tasks = [
+        //       ...tasks,
+        //       { name: match.replace("- [ ] ", ""), checked: false },
+        //     ];
+        //   }
+        // }
+  
+        const date = item.properties.CreatedAt.rich_text[0].plain_text;
+        return {
+          id,
+          guildId,
+          channelId,
+          messageId,
+          date,
+          summary,
+          status,
+          tasks,
+          assigns,
+          skips,
+        };
+  
+      }catch(e){
+        //console.log(e.message)
       }
-
-      const date = item.properties.date.date.start;
-      return {
-        id,
-        guildId,
-        channelId,
-        messageId,
-        date,
-        summary,
-        status,
-        tasks,
-        assigns,
-      };
-    });
+    }).filter(Boolean);
 
     return {
       tasks: results,
@@ -146,20 +179,25 @@ const getUsers = async (address = "") => {
     }
 
     const responseJson = await response.json();
+    console.log(responseJson)
     const results = responseJson.results.map((item) => {
-      const id = item.id;
-      const address = item.properties.walletAddress.title[0].plain_text;
-      const userName = item.properties.userName.rich_text[0].plain_text;
-      const iconUrl = item.properties.iconUrl.rich_text[0].plain_text;
-      return { id, address, userName, iconUrl };
-    });
+      try{
+        const id = item.id;
+        const address = item.properties.walletAddress.title[0].plain_text;
+        const userName = item.properties.userName.rich_text[0].plain_text;
+        const iconUrl = item.properties.iconUrl.rich_text[0].plain_text;
+        return { id, address, userName, iconUrl };  
+      }catch(error){
+        console.log(item,error)
+      }
+    }).filter(Boolean);
     return {
       users: results,
       hasMore: responseJson.has_more,
       nextCursor: responseJson.next_cursor,
     };
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
     return [];
   }
 };
@@ -178,7 +216,6 @@ const addAssign = async (address, taskItem) => {
       indexes: indexes,
     };
 
-    //https://3emm6xaoyufyll6xdmocaxmrou0ogrfi.lambda-url.ap-northeast-1.on.aws/
     const response = await fetch(
       `https://notionmanager.ukishima.repl.co/assign`,
       {
@@ -270,6 +307,7 @@ const mintAssignToken = async (address, taskItem) => {
         }
       }
     });
+    console.log("Reciever", recievers);
 
     let tasks = [];
     for (const [index, address] of Object.entries(recievers)) {
@@ -307,7 +345,16 @@ const mintAssignToken = async (address, taskItem) => {
       tasks: tasks,
     };
 
-    await updateStatus(taskItem, "fixed");
+    let skips = taskItem.tasks
+      .map((task, index) => {
+        if (!task.checked) {
+          return index;
+        }
+      })
+      .filter((v) => v != undefined);
+    skips = [...taskItem.skips, ...skips];
+
+    await updateStatus(taskItem, "fixed", skips);
 
     const options = {
       method: "POST",
@@ -322,7 +369,7 @@ const mintAssignToken = async (address, taskItem) => {
     );
 
     const mintResponseJson = await mintResponse.json();
-
+    mintResponseJson.skips = skips;
     return mintResponseJson;
   } catch (error) {
     console.error(error.message);
@@ -333,42 +380,20 @@ const mintAssignToken = async (address, taskItem) => {
 const mintCompletionToken = async (address, taskItem) => {
   try {
     if (!taskItem) throw new Error("Require taskItem");
-    const response = await fetch(
-      `https://notionmanager.ukishima.repl.co/getAssign?id=${taskItem.id}`,
-      {
-        method: "GET",
-        compress: true,
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const responseJson = await response.json();
-
-    const recievers = {};
-    responseJson.results.map((item) => {
-      const address = item.properties.assignUserAddress.rich_text[0].plain_text;
-      for (const taskIndex of item.properties.tasksIndexies.multi_select) {
-        const isSelected = taskItem.tasks[taskIndex.name].checked;
-        if (isSelected) {
-          recievers[taskIndex.name] = [
-            ...(recievers[taskIndex.name] ?? []),
-            address,
-          ];
-        }
-      }
-    });
 
     let tasks = [];
-    for (const [index, address] of Object.entries(recievers)) {
-      if (address.length > 0) {
+    for (const [index, users] of Object.entries(taskItem.assigns.indexes)) {
+      if (taskItem.tasks[index].checked && users.length > 0) {
         const taskName = taskItem.tasks[index].name;
+
+        const addresses = users.map((user) => {
+          return user.assignUserAddress;
+        });
+
         tasks = [
           ...tasks,
           {
-            walletAddress: address,
+            walletAddress: addresses,
             task: { name: taskName, id: `${taskItem.id}-${index}` },
           },
         ];
@@ -382,7 +407,16 @@ const mintCompletionToken = async (address, taskItem) => {
     const usersInfo = await getUsers(address);
     const guildsInfo = await getGuilds(taskItem.guildId);
 
-    await updateStatus(taskItem, "completed");
+    let skips = taskItem.tasks
+      .map((task, index) => {
+        if (!task.checked) {
+          return index;
+        }
+      })
+      .filter((v) => v != undefined);
+    skips = [...taskItem.skips, ...skips];
+
+    await updateStatus(taskItem, "completed", skips);
 
     const requestData = {
       status: "done",
@@ -413,6 +447,7 @@ const mintCompletionToken = async (address, taskItem) => {
     );
 
     const mintResponseJson = await mintResponse.json();
+    mintResponseJson.skips = skips;
 
     return mintResponseJson;
   } catch (error) {
@@ -421,11 +456,12 @@ const mintCompletionToken = async (address, taskItem) => {
   }
 };
 
-const updateStatus = async (taskItem, status) => {
+const updateStatus = async (taskItem, status, skips) => {
   try {
     const requestData = {
       id: taskItem.id,
       status: status,
+      skips: skips,
     };
 
     console.log(requestData);
