@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
+import { QuestionMarkCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
 import cloneDeep from "lodash/cloneDeep";
 import { useAccount } from "wagmi";
 
@@ -22,8 +22,9 @@ const defaultTaskItem = {
   tasks: [],
   date: "",
   status: TaskStatus.active,
+  assigns: { users: [], indexes: [] },
+  skips: [],
 };
-
 
 const CompleteTasks = (props) => {
   const { address, isConnected } = useAccount();
@@ -34,7 +35,8 @@ const CompleteTasks = (props) => {
     context: "",
     isShow: false,
   });
-  const [isInMintCompleteTokenProcess, setIsInMintCompleteTokenProcess] = useState(false);
+  const [isInMintCompleteTokenProcess, setIsInMintCompleteTokenProcess] =
+    useState(false);
 
   const cancelButtonRef = useRef(null);
 
@@ -47,6 +49,12 @@ const CompleteTasks = (props) => {
     setMintTaskItem(results);
   }, [props.isOpen]);
 
+  useEffect(() => {
+    if (!open) {
+      props.callback(open);
+    }
+  }, [open]);
+
   const checkHandler = (index) => {
     const results = { ...mintTaskItem };
     results.tasks[index].checked = !results.tasks[index].checked;
@@ -56,19 +64,25 @@ const CompleteTasks = (props) => {
   const mintButtonClickHandler = async () => {
     setIsInMintCompleteTokenProcess(true);
     const result = await mintCompletionToken(address, mintTaskItem);
-    //   const result = {
-    //     "status": "success",
-    //     "txHash": "0x31f1a31871e84b19c21bd8bf47171d97c0ac931f33ed6ec8232d49b683d0ad9a",
-    //     "message": ""
-    // };
-    //console.log(result);
     if (result.txHash) {
-      console.log(`explorer: https://mumbai.polygonscan.com/tx/${result.txHash}`);
+      console.log(
+        `explorer: https://mumbai.polygonscan.com/tx/${result.txHash}`
+      );
     }
 
     setIsInMintCompleteTokenProcess(false);
     if (result.status === "success") {
-      props.updateStatus(TaskStatus.completed);
+      const mintedTaskItem = {...mintTaskItem};
+      mintedTaskItem.status = TaskStatus.completed;
+      mintedTaskItem.skips = result.skips;
+      mintedTaskItem.tasks.map((task, index) => {
+        if (result.skips.includes(index)) {
+          mintedTaskItem.tasks[index].checked = false;
+        }
+      });
+
+      
+      props.updateStatus(mintedTaskItem);
       setNotification({
         header: "発行完了",
         context: "CompleteNFTが発行されました。",
@@ -91,18 +105,28 @@ const CompleteTasks = (props) => {
     setOpen(false);
   };
 
+  const trashClickHandler = (index, userIndex) => {
+    setMintTaskItem((prev) => {
+      const users = prev.assigns.indexes[index].filter((_, i) => {
+        return i != userIndex;
+      });
+      prev.assigns.indexes[index] = users;
+      return { ...prev };
+    });
+  };
+
   const cancelButtonClickHandler = () => {
     setOpen(false);
     props.callback(false);
   };
 
   return (
-    <div className="z-50 border border-none">
+    <div className="z-50 border border-none w-screen">
       <Notification {...notification} />
       <Transition.Root show={open} as={Fragment}>
         <Dialog
           as="div"
-          className="relative z-10"
+          className="relative z-10 w-screen"
           initialFocus={cancelButtonRef}
           onClose={setOpen}
         >
@@ -118,8 +142,8 @@ const CompleteTasks = (props) => {
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
           </Transition.Child>
 
-          <div className="fixed inset-0 z-10 overflow-y-auto">
-            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="fixed inset-0 z-10 overflow-y-auto w-full">
+            <div className="flex min-h-full items-end justify-center p-2 text-center sm:items-center sm:p-0">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
@@ -129,7 +153,7 @@ const CompleteTasks = (props) => {
                 leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                 leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
               >
-                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 w-full sm:w-full sm:max-w-lg">
                   <div
                     className={
                       isInMintCompleteTokenProcess
@@ -158,35 +182,93 @@ const CompleteTasks = (props) => {
                         <p className=" text-left text-sm text-gray-700">
                           完了するTaskを選択してください。
                         </p>
-                        <div className="mt-4 text-sm font-medium text-gray-900 text-left">
-                          {mintTaskItem.tasks.map((task, index) => {
-                            return (
-                              <div
-                                className="relative flex items-start"
-                                key={`CompleteTasks-${mintTaskItem.id}-dev-${index}`}
-                              >
-                                <div className="flex h-6 items-center">
-                                  <input
-                                    id={`CompleteTasks-${mintTaskItem.id}-checkbox-${index}`}
-                                    aria-describedby="comments-description"
-                                    name={`CompleteTasks-${mintTaskItem.id}-checkbox-${index}`}
-                                    type="checkbox"
-                                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                                    onChange={() => checkHandler(index)}
-                                    checked={task.checked}
-                                  />
-                                </div>
-                                <div className="ml-3 text-sm leading-6">
-                                  <label
-                                    htmlFor={`CompleteTasks-${mintTaskItem.id}-checkbox-${index}`}
-                                    className="font-medium text-gray-900"
+                        <div className="flex">
+                          <div className="mt-4 text-sm font-medium text-gray-900 text-left">
+                            {mintTaskItem.tasks.map((task, index) => {
+                              return (
+                                <>
+                                  <div
+                                    className="relative flex items-start"
+                                    key={`CompleteTasks-${mintTaskItem.id}-dev-${task.id}-${index}`}
                                   >
-                                    {task.name}
-                                  </label>{" "}
-                                </div>
-                              </div>
-                            );
-                          })}
+                                    <div className="flex h-6 items-center">
+                                      <input
+                                        id={`CompleteTasks-${mintTaskItem.id}-checkbox-${index}`}
+                                        aria-describedby="comments-description"
+                                        name={`CompleteTasks-${mintTaskItem.id}-checkbox-${index}`}
+                                        type="checkbox"
+                                        onChange={() => checkHandler(index)}
+                                        className={
+                                          mintTaskItem.assigns.indexes[index]
+                                            ?.length > 0 && task.checked && !mintTaskItem.skips.includes(index)
+                                            ? "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                            : "h-4 w-4 rounded border-gray-200  text-transparent focus:ring-transparent"
+                                        }
+                                        checked={
+                                          mintTaskItem.assigns.indexes[index]
+                                            ?.length > 0 && task.checked && !mintTaskItem.skips.includes(index)
+                                        }
+                                      />
+                                    </div>
+                                    <div className="ml-3 text-sm leading-6">
+                                      <label
+                                        htmlFor={`CompleteTasks-${mintTaskItem.id}-checkbox-${index}`}
+                                        className={
+                                          mintTaskItem.assigns.indexes[index]
+                                            ?.length > 0 && task.checked && !mintTaskItem.skips.includes(index)
+                                            ? "font-medium text-gray-900"
+                                            : "font-medium text-gray-300"
+                                        }
+                                      >
+                                        {task.name}
+                                      </label>{" "}
+                                    </div>
+                                  </div>
+                                  <div className="inline-block">
+                                    {mintTaskItem.assigns.indexes[index]?.map(
+                                      (user, userIndex) => {
+                                        return (
+                                          <div
+                                            className="flex mb-1 justify-between"
+                                            key={`complete-${mintTaskItem.id}-${task.id}-${index}-${user.assignUserAddress}`}
+                                          >
+                                            <img
+                                              className={
+                                                task.checked
+                                                  ? "h-5 w-5 mx-2 rounded-full"
+                                                  : "h-5 w-5 mx-2 rounded-full grayscale"
+                                              }
+                                              
+                                              src={user.iconUrl}
+                                            />
+                                            <p
+                                              className={
+                                                task.checked
+                                                  ? "flex"
+                                                  : "flex text-gray-300"
+                                              }
+                                            >
+                                              {user.assignUserAddress}
+                                            </p>
+                                            <TrashIcon
+                                              className="h-5 w-5 ml-1 text-gray-600"
+                                              aria-hidden="true"
+                                              onClick={() => {
+                                                trashClickHandler(
+                                                  index,
+                                                  userIndex
+                                                );
+                                              }}
+                                            />
+                                          </div>
+                                        );
+                                      }
+                                    )}
+                                  </div>
+                                </>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
                     </div>

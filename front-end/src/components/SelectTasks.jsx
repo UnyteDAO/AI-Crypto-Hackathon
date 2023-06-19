@@ -22,6 +22,8 @@ const defaultTaskItem = {
   tasks: [],
   date: "",
   status: TaskStatus.active,
+  assigns: { users: [], indexes: [] },
+  skips: [],
 };
 
 const SelectTasks = (props) => {
@@ -70,7 +72,15 @@ const SelectTasks = (props) => {
 
     setIsInMintAssignTokenProcess(false);
     if (result.status === "success") {
-      props.updateStatus(TaskStatus.fixed);
+      const mintedTaskItem = { ...mintTaskItem };
+      mintedTaskItem.status = TaskStatus.fixed;
+      mintedTaskItem.skips = result.skips;
+      mintedTaskItem.tasks.map((task, index) => {
+        if (result.skips.includes(index)) {
+          mintedTaskItem.tasks[index].checked = false;
+        }
+      });
+      props.updateStatus(mintedTaskItem);
       setNotification({
         header: "発行完了",
         context: "アサインNFTが発行されました。",

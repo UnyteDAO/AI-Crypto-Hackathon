@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   HandRaisedIcon,
   PlayIcon,
@@ -7,11 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useAccount } from "wagmi";
 
-import {
-  addAssign,
-  getUsers,
-  mintCompletionToken,
-} from "../modules/Notion.mjs";
+import { addAssign } from "../modules/Notion.mjs";
 
 import Notification from "./Notification";
 import SelectTasks from "./SelectTasks";
@@ -33,6 +29,7 @@ const defaultTaskItem = {
   date: "",
   status: TaskStatus.active,
   assigns: { users: [], indexes: [] },
+  skips: [],
 };
 
 const TaskItem = (props) => {
@@ -50,8 +47,8 @@ const TaskItem = (props) => {
   const [isInMintCompleteTokenProcess, setIsInMintCompleteTokenProcess] =
     useState(false);
 
-  useLayoutEffect(() => {
-    setTaskItem((prev) => ({ ...prev, ...props }));
+  useEffect(() => {
+    setTaskItem((prev) => ({ ...prev }, { ...props }));
   }, []);
 
   const checkHandler = (index) => {
@@ -78,8 +75,11 @@ const TaskItem = (props) => {
         return task.checked;
       });
 
-      const assignedUser = await addAssign(address, taskItem);
-      console.log(assignedUser);
+      const result = await addAssign(address, taskItem);
+      const icon =
+        result.length !== 0
+          ? result[0].iconUrl
+          : "https://upload.wikimedia.org/wikipedia/commons/b/bc/Unknown_person.jpg";
 
       setTaskItem((prev) => {
         let result = { ...prev };
@@ -88,18 +88,53 @@ const TaskItem = (props) => {
         });
 
         if (!isAssigned) {
+          const tasksIndexes = taskItem.tasks
+            .map((task, index) => {
+              if (task.checked) {
+                return index;
+              }
+            })
+            .filter((item) => item != undefined);
+
           result.assigns.users = [
             ...prev.assigns.users,
-            { assignUserAddress: address, iconUrl: assignedUser[0].iconUrl },
+            {
+              assignUserAddress: address,
+              tasksIndexes: tasksIndexes,
+              iconUrl: icon
+            },
           ];
+        } else {
+          //result.assigns.users = [];
         }
+
+
+        let indexes = {};
+        if (result.assigns.users) {
+          result.assigns.users.forEach((item) => {
+            item.tasksIndexes?.forEach((index) => {
+              if (!indexes[index]) {
+                indexes[index] = [];
+              }
+              indexes[index] = [
+                ...indexes[index],
+                {
+                  assignUserAddress: item.assignUserAddress,
+                  iconUrl: item.iconUrl,
+                  name: item.name,
+                },
+              ];
+            });
+          });
+        }
+
+        result.assigns.indexes = indexes;
 
         if (!isSomeChecked) {
           result.assigns.users = result.assigns.users.filter(
             (item) => item.assignUserAddress != address
           );
         }
-
         return result;
       });
 
@@ -186,8 +221,10 @@ const TaskItem = (props) => {
     });
   };
 
-  const updateStatus = (status) => {
-    setTaskItem((prev) => ({ ...prev, status }));
+  const updateStatus = (mintedTaskItem) => {
+    const item = { ...mintedTaskItem };
+    item.tasks = [...taskItem.tasks];
+    setTaskItem(item);
   };
 
   return (
@@ -237,7 +274,11 @@ const TaskItem = (props) => {
                         ? "w-5 h-5 m-y-auto mr-2 rounded-full"
                         : "w-5 h-5 m-y-auto mr-2 rounded-full"
                     }
-                    src={user.iconUrl}
+                    src={
+                      user.iconUrl === ""
+                        ? "https://upload.wikimedia.org/wikipedia/commons/b/bc/Unknown_person.jpg"
+                        : user.iconUrl
+                    }
                   />
                   <p
                     className={
@@ -287,7 +328,7 @@ const TaskItem = (props) => {
                   ) : taskItem.status === TaskStatus.fixed ? (
                     <PlayIcon
                       className={
-                        task.checked
+                        task.checked && !taskItem.skips.includes(index)
                           ? "h-4 w-4 text-red-500"
                           : "h-4 w-4 text-transparent"
                       }
@@ -296,7 +337,7 @@ const TaskItem = (props) => {
                   ) : taskItem.status === TaskStatus.completed ? (
                     <TrophyIcon
                       className={
-                        task.checked
+                        task.checked && !taskItem.skips.includes(index)
                           ? "h-4 w-4 text-green-700"
                           : "h-4 w-4 text-transparent"
                       }
@@ -323,17 +364,40 @@ const TaskItem = (props) => {
                     disabled={taskItem.status >= TaskStatus.fixed}
                   /> */}
                 </div>
-                <div className="ml-3 text-sm leading-6">
-                  <label
-                    htmlFor={`taskitem-${taskItem.id}-checkbox-${index}`}
-                    className={
-                      task.checked || taskItem.status == TaskStatus.active
-                        ? "font-medium text-gray-900"
-                        : "font-medium text-gray-400"
-                    }
-                  >
-                    {task.name}
-                  </label>{" "}
+                <div className="flex w-full justify-between">
+                  <div className="ml-3 text-sm leading-6 w-10/12">
+                    <label
+                      htmlFor={`taskitem-${taskItem.id}-checkbox-${index}`}
+                      className={
+                        task.checked || taskItem.status == TaskStatus.active
+                          ? "font-medium text-gray-900"
+                          : "font-medium text-gray-400"
+                      }
+                    >
+                      {task.name}
+                    </label>{" "}
+                  </div>
+                  <div className="flex w-3/12 justify-end">
+                    <span
+                      className={
+                        task.type == "開発"
+                          ? "ml-3 inline-flex max-h-5 items-center rounded-lg bg-orange-100 px-2 py-1 text-xs font-medium text-orange-600 ring-1 ring-inset ring-red-500/10"
+                          : task.type == "デザイン"
+                          ? "ml-3 inline-flex max-h-5 items-center rounded-lg bg-red-100 px-2 py-1 text-xs font-medium text-red-600 ring-1 ring-inset ring-orange-500/10"
+                          : task.type == "BizDev"
+                          ? "ml-3 inline-flex max-h-5 items-center rounded-lg bg-blue-100 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/10"
+                          : task.type == "コミュニティ"
+                          ? "ml-3 inline-flex max-h-5 items-center rounded-lg bg-green-100 px-2 py-1 text-xs font-medium text-green-600 ring-1 ring-inset ring-green-500/10"
+                          : task.type == "マーケティング"
+                          ? "ml-3 inline-flex max-h-5 items-center rounded-lg bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-600 ring-1 ring-inset ring-yellow-500/10"
+                          : task.type == "営業"
+                          ? "ml-3 inline-flex max-h-5 items-center rounded-lg bg-cyan-100 px-2 py-1 text-xs font-medium text-cyan-600 ring-1 ring-inset ring-cyan-500/10"
+                          : "ml-3 inline-flex max-h-5 items-center rounded-lg bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
+                      }
+                    >
+                      {task.type}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
