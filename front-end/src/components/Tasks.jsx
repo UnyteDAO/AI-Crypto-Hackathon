@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import TaskItem from "./TaskItem";
 import { getAssign, getTasks } from "../modules/Notion.mjs";
@@ -11,7 +11,7 @@ const Tasks = (props) => {
 
   const [isInLoadingProcess, setIsInLoadingProcess] = useState(true);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const initializeTaskData = async () => {
       setIsInLoadingProcess(true);
       const result = await getTasks();
@@ -34,7 +34,7 @@ const Tasks = (props) => {
     initializeTaskData();
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setDisplayData((prev) => []);
     const initializeTaskData = async () => {
       setIsInLoadingProcess(true);
@@ -59,7 +59,7 @@ const Tasks = (props) => {
     initializeTaskData();
   }, [address]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const getNextTasks = async () => {
       setIsInLoadingProcess(true);
       const result = await getTasks(nextCursor);
@@ -74,7 +74,7 @@ const Tasks = (props) => {
     }
   }, [props.needNextTasks]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const guildFilterd = taskData.filter((data) => {
       const isGuildChecked = props.filters[0].options.some(
         (item) =>
@@ -92,17 +92,28 @@ const Tasks = (props) => {
       return ischannleChecked;
     });
 
+    const typeFiltered = channelFilterd.filter((data) => {
+      const isTypeChecked = props.filters[2].options.some((item) =>
+        data.tasks.some((task) => {
+          return item.value == task.type && item.checked;
+        })
+      );
+      return isTypeChecked;
+    });
+
+    const filteredTaskItem = typeFiltered;
+
     let sortedData;
     if (props.sortOptions[0].current) {
-      sortedData = [...channelFilterd].sort(
+      sortedData = [...filteredTaskItem].sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       );
     } else if (props.sortOptions[1].current) {
-      sortedData = [...channelFilterd].sort(
+      sortedData = [...filteredTaskItem].sort(
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
       );
     } else {
-      sortedData = [...channelFilterd];
+      sortedData = [...filteredTaskItem];
     }
     setDisplayData(sortedData);
   }, [props, taskData]);

@@ -62,6 +62,7 @@ const defaultFilters = [
       { value: "コミュニティ", label: "コミュニティ", checked: true },
       { value: "マーケティング", label: "マーケティング", checked: true },
       { value: "営業", label: "営業", checked: true },
+      { value: "その他", label: "その他", checked: true },
     ],
   },
 ];
@@ -242,9 +243,11 @@ const App = () => {
                                       defaultChecked={option.checked}
                                       className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                     />
-                                    <div className="h-6 w-6 ml-1">
-                                      <img src={option.icon}></img>
-                                    </div>
+                                    {section.id == "Guild" ? (
+                                      <div className="h-6 w-6 ml-1">
+                                        <img src={option.icon}></img>
+                                      </div>
+                                    ) : null}
                                     <label
                                       htmlFor={`filter-mobile-${section.id}-${optionIdx}`}
                                       className="ml-1 min-w-0 flex-1 text-gray-500"
@@ -417,12 +420,16 @@ const App = () => {
                                   defaultChecked={option.checked}
                                   className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                 />
-                                <div className="flex ml-3 w-8 items-center justify-start">
-                                  <img className="w-4 h-4" src={option.icon}></img>
-                                </div>
+                                {section.id == "Guild" ? (
+                                  <div className="flex ml-1 w-8 items-center justify-start">
+                                    <div className="h-4 w-4 ml-1">
+                                      <img src={option.icon}></img>
+                                    </div>
+                                  </div>
+                                ) : null}
                                 <label
                                   htmlFor={`filter-${section.id}-${optionIdx}`}
-                                  className="ml-1 text-sm text-gray-600 justify-start"
+                                  className="ml-2 text-sm text-gray-600 justify-start"
                                 >
                                   {option.label}
                                 </label>
