@@ -39,7 +39,7 @@ Discord Bot招待リンク： https://discord.com/api/oauth2/authorize?client_id
 
 ## 概要動画
 
-（動画サムネが入ります）
+![https://youtu.be/V6bapKpFG_4](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/f58e4968-529a-43be-b47b-bd81d3c38ded)
 
 ## プロダクト概要
 
