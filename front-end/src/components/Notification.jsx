@@ -72,7 +72,7 @@ const Notification = (props) => {
                     {show.txHash !== "" ? (
                       <a
                         className="text-sm underline text-blue-600"
-                        href={`https://mumbai.polygonscan.com/tx/${show.txHash}`}
+                        href={`https://astar.subscan.io/extrinsic/${show.txHash}`}
                         target="_blank"
                       >
                         {`${show.txHash?.substring(0,6)}...${show.txHash?.substring(show.txHash.length -4)}`}
