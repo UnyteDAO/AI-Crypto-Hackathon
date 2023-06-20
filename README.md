@@ -84,8 +84,6 @@ https://youtu.be/V6bapKpFG_4
 
 ![test drawio](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/c991638c-d4a4-4acc-b3c5-b22250f74946)
 
-!https://github.com/ukishima/EOA-Crypt-For-Tokyo-Web3-Hackathon/raw/main/docs/overview/pic_architecture.jpg
-
 ## Tech Stacks
 
 | Category | Name |
