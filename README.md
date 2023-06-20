@@ -7,8 +7,6 @@ Live demo: https://unytedao.github.io/AI-Crypto-Hackathon/
 
 Discord Bot招待リンク： https://discord.com/api/oauth2/authorize?client_id=1118547611893370970&permissions=8&scope=bot
 
-スライド：https://docs.google.com/presentation/d/1vMPAK55h5T4BDjJAiGHF7Y96Ua9umWu9jwQdR2S19-c/edit?usp=sharing
-
 ドキュメント：https://unyte.notion.site/WTF-is-Taskal-f0eb4b3c4b9f4a44bdd33bf96e2dcc8a?pvs=4
 
 ## テーマの背景
