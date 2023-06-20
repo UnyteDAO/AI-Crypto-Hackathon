@@ -282,9 +282,9 @@ const App = () => {
               accountStatus="full"
             />
           </div>
-          <div className="flex items-baseline justify-between border-b border-gray-200 pb-6">
+          <div className="flex items-baseline justify-between border-b border-gray-200 pb-2">
             <div>
-              <img className="h-10 w-30" src="./logo.png" />
+              <img className="relative h-10 w-30" src="./logo.png" />
             </div>
 
             <div className="flex items-center">
@@ -370,8 +370,15 @@ const App = () => {
               </button>
             </div>
           </div>
+          <div className="flex justify-end pt-2">
+            <div className="inline-flex items-center justify-between sd:hidden">
+              <p className="text-blue-600 mr-3">&#x1F7E6;募集中</p>
+              <p className="text-red-600 mr-3">&#x1F7E5;作業中</p>
+              <p className="text-green-600 mr-3">&#x1F7E9;完了</p>
+            </div>
+          </div>
 
-          <section aria-labelledby="products-heading" className="pb-24 pt-6">
+          <section aria-labelledby="products-heading" className="pb-24 pt-2">
             <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-8">
               {/* Filters */}
               <form className="hidden lg:block">
