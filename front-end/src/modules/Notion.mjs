@@ -273,7 +273,7 @@ const addAssign = async (address, taskItem) => {
     const usersResults = await getUsers(address);
     return usersResults.users;
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
     throw new Error("追加失敗", { caluse: error });
   }
 };
@@ -405,11 +405,11 @@ const mintAssignToken = async (address, taskItem) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
       },
       compress: true,
       body: JSON.stringify(requestData),
     };
+
     const mintResponse = await fetch(
       "https://3emm6xaoyufyll6xdmocaxmrou0ogrfi.lambda-url.ap-northeast-1.on.aws/",
       //"https://a5guh723j5wcy2ns7vopdfjcu40qukfn.lambda-url.ap-northeast-1.on.aws/",
@@ -417,10 +417,11 @@ const mintAssignToken = async (address, taskItem) => {
     );
 
     const mintResponseJson = await mintResponse.json();
+
     mintResponseJson.skips = skips;
     return mintResponseJson;
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
     return { status: "error", message: error.message };
   }
 };
@@ -485,11 +486,11 @@ const mintCompletionToken = async (address, taskItem) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
       },
       compress: true,
       body: JSON.stringify(requestData),
     };
+
     const mintResponse = await fetch(
       "https://3emm6xaoyufyll6xdmocaxmrou0ogrfi.lambda-url.ap-northeast-1.on.aws/",
       //"https://a5guh723j5wcy2ns7vopdfjcu40qukfn.lambda-url.ap-northeast-1.on.aws/",
@@ -501,7 +502,7 @@ const mintCompletionToken = async (address, taskItem) => {
 
     return mintResponseJson;
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
     return { status: "error", message: error.message };
   }
 };
