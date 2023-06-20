@@ -39,7 +39,7 @@ Discord Bot招待リンク： https://discord.com/api/oauth2/authorize?client_id
 
 ## 概要動画
 
-[![]('blob:https://imgur.com/61a6a31c-73e0-4eac-9c0a-a11918e6db4d')]('https://youtu.be/V6bapKpFG_4')
+[!['altテキスト']('blob:https://imgur.com/61a6a31c-73e0-4eac-9c0a-a11918e6db4d')]('https://youtu.be/V6bapKpFG_4')
 
 ## プロダクト概要
 
