@@ -7,6 +7,8 @@ Live demo: https://unytedao.github.io/AI-Crypto-Hackathon/
 
 Discord Bot招待リンク： https://discord.com/api/oauth2/authorize?client_id=1118547611893370970&permissions=8&scope=bot
 
+スライド：https://docs.google.com/presentation/d/1vMPAK55h5T4BDjJAiGHF7Y96Ua9umWu9jwQdR2S19-c/edit?usp=sharing
+
 ## テーマの背景
 
 2023年は第4次AIブームの始まりともいえる年となり、人の指示や質問に応じて文章や画像などを作ることができるChatGPT等の生成AIは大きく技術的な発展を遂げています。
@@ -38,8 +40,11 @@ Discord Bot招待リンク： https://discord.com/api/oauth2/authorize?client_id
 また、今回のプロダクトではチャットログの要約とタスクの抽出に加え、タスク実行＝貢献履歴の可視化を行う機能も追加しました。メンバーがタスクを担当する意思表示をした段階、実際にタスクをこなして成果物を提出した段階のそれぞれにおいて、該当するメンバーにタスクの情報を記録したNFTを発行します。これにより、「誰が」「どのコミュニティで」「どんな貢献をしたか」というデータを、ブロックチェーンというパブリックかつ改ざん不可能な場所に保存することができ、誰もが自身の貢献履歴を簡単に証明できるようになっています。我々は「経歴の証明」がブロックチェーンの主たるユースケースになると確信しており、今回のアウトプットはブロックチェーンを社会実装するための1つの解を示しているものと考えます。
 
 ## 概要動画
+https://youtu.be/V6bapKpFG_4
 
-[![動画](https://imgur.com/de90339a-84f8-4b9a-a0e6-9c2dd7198246)](https://youtu.be/V6bapKpFG_4)
+https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/0926144a-8852-4bcb-a2b9-64e43b018f74
+
+
 
 ## プロダクト概要
 
@@ -75,10 +80,6 @@ Discord上で稼働するBotをサーバーに招待することで、テキス�
 ![ありがとう！](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/7f29f16c-8fc6-4dad-985b-b49c268179d4)
 ![お願い！](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/42a96773-1daf-409a-a845-cfc7f29923cf)
 これにより、どのユーザーがどんなコミュニティでどれくらい貢献してきたのかというデータをブロックチェーン上に保存することができ、ユーザーの経歴も簡単に証明することが可能になります。
-
-## 概要動画
-
-https://youtu.be/V6bapKpFG_4
 
 ## アーキテクチャー
 
