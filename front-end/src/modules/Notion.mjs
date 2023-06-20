@@ -43,10 +43,10 @@ const getTasks = async (nextCursor = "") => {
             if (
               ![
                 "開発",
-                "デザイン",
+                "Design",
                 "BizDev",
                 "コミュニティ",
-                "マーケティング",
+                "マーケ",
                 "営業",
               ].includes(task.type)
             ) {
