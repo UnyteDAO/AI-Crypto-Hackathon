@@ -7,11 +7,11 @@ import "@rainbow-me/rainbowkit/styles.css";
 
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
-import { goerli, sepolia, polygonMumbai } from "wagmi/chains";
+import { goerli, sepolia, polygonMumbai, polygon, mainnet } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 
 const { chains, publicClient } = configureChains(
-  [goerli, sepolia, polygonMumbai],
+  [mainnet, polygon, sepolia, polygonMumbai, goerli],
   [publicProvider()]
 );
 
