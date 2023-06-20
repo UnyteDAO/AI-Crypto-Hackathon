@@ -145,6 +145,11 @@ const Tasks = (props) => {
               status={data.status}
               assigns={data.assigns}
               skips={data.skips}
+              channelName={
+                props.filters[1].options.filter(
+                  (item) => item.value == data.channelId
+                )[0]?.label ?? ""
+              }
             />
           );
         })}
