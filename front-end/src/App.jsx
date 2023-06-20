@@ -46,10 +46,10 @@ const defaultFilters = [
     name: "Type",
     options: [
       { value: "開発", label: "開発", checked: true },
-      { value: "デザイン", label: "デザイン", checked: true },
+      { value: "Design", label: "Design", checked: true },
       { value: "BizDev", label: "BizDev", checked: true },
       { value: "コミュニティ", label: "コミュニティ", checked: true },
-      { value: "マーケティング", label: "マーケティング", checked: true },
+      { value: "マーケ", label: "マーケ", checked: true },
       { value: "営業", label: "営業", checked: true },
       { value: "その他", label: "その他", checked: true },
     ],
