@@ -39,18 +39,7 @@ const defaultFilters = [
   {
     id: "Channel",
     name: "Channel",
-    options: [
-      {
-        value: "1118546453837652159",
-        label: "developing-product",
-        checked: true,
-      },
-      { value: "1044848947497291826", label: "Biz General", checked: true },
-      { value: "967663391500013639", label: "BizDev Unyte", checked: true },
-      { value: "Channel4", label: "Channel4", checked: true },
-      { value: "Channel5", label: "Channel5", checked: true },
-      { value: "Channel6", label: "Channel6", checked: true },
-    ],
+    options: [],
   },
   {
     id: "Type",
@@ -88,6 +77,7 @@ const App = () => {
               value: guild.guildId,
               label: guild.guildName,
               icon: guild.iconUrl,
+              channels: guild.channels,
               checked: true,
             };
           } else {
@@ -101,6 +91,7 @@ const App = () => {
                 value: guild.guildId,
                 label: guild.guildName,
                 icon: guild.iconUrl,
+                channels: guild.channels,
                 checked: true,
               };
             }
@@ -110,6 +101,18 @@ const App = () => {
         setFilters((prev) => {
           const filters = [...prev];
           filters[0].options = options.filter((v) => v != undefined);
+          filters[0].options.map((guildOption) => {
+            const channelsOption = guildOption.channels.map((channel) => {
+              return {
+                value: channel.id,
+                label: channel.name,
+                icon: guildOption.icon,
+                checked: true,
+              };
+            });
+            const addingFilters = channelsOption.filter((v) => v != undefined);
+            filters[1].options = [...filters[1].options, ...addingFilters];
+          });
           return filters;
         });
       });
@@ -236,14 +239,16 @@ const App = () => {
                                   >
                                     <input
                                       id={`filter-mobile-${section.id}-${optionIdx}`}
-                                      onChange={() => checkHandler(section.id,optionIdx)}
+                                      onChange={() =>
+                                        checkHandler(section.id, optionIdx)
+                                      }
                                       name={`${section.id}[]`}
                                       defaultValue={option.value}
                                       type="checkbox"
                                       defaultChecked={option.checked}
                                       className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                     />
-                                    {section.id == "Guild" ? (
+                                    {section.id == "Guild" || "Channel" ? (
                                       <div className="h-6 w-6 ml-1">
                                         <img src={option.icon}></img>
                                       </div>
@@ -278,9 +283,9 @@ const App = () => {
             />
           </div>
           <div className="flex items-baseline justify-between border-b border-gray-200 pb-6">
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-              New Arrivals
-            </h1>
+            <div>
+              <img className="h-10 w-30" src="./logo.png" />
+            </div>
 
             <div className="flex items-center">
               <Menu as="div" className="relative inline-block text-left">
@@ -420,7 +425,8 @@ const App = () => {
                                   defaultChecked={option.checked}
                                   className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                 />
-                                {section.id == "Guild" ? (
+                                {section.id == "Guild" ||
+                                section.id == "Channel" ? (
                                   <div className="flex ml-1 w-8 items-center justify-start">
                                     <div className="h-4 w-4 ml-1">
                                       <img src={option.icon}></img>

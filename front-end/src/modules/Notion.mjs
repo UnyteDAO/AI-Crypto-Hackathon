@@ -1,3 +1,5 @@
+import { head } from "lodash";
+
 const TaskStatus = Object.freeze({
   active: 1,
   fixed: 2,
@@ -10,6 +12,10 @@ const getTasks = async (nextCursor = "") => {
       `https://notionmanager.ukishima.repl.co/tasks?start=${nextCursor}`,
       {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
         compress: true,
       }
     );
@@ -20,106 +26,121 @@ const getTasks = async (nextCursor = "") => {
 
     const usersResults = await getUsers();
 
-    const results = responseJson.results.map((item) => {
-      try{
-        const id = item.id;
-        const guildId = item.properties.GuildId.rich_text[0].plain_text;
-        const channelId = item.properties.ChannelId.rich_text[0].plain_text;
-        const messageId = item.properties.FirstMessageId.rich_text[0].plain_text;
-        const summary = item.properties.GPTSummary.rich_text[0].plain_text;
-        const tasks = JSON.parse(item.properties.GPTTaskType.rich_text[0].plain_text);
-        for(const task of tasks){
-          task.checked = false;
-          if(!["開発","デザイン","BizDev","コミュニティ","マーケティング","営業"].includes(task.type)){
-            task.type="その他"
-          }
-        }
-        
-        const skips = item.properties.skips.multi_select.map((skip) => {
-          return parseInt(skip.name);
-        });
-        const assigns = {
-          users: item.properties.assigns.rollup.array
-            .map((data) => {
-              if (data.formula.string) {
-                const result = JSON.parse(data.formula.string);
-  
-                result.tasksIndexes = result.tasksIndexes.filter((index) => {
-                  return !skips.includes(index);
-                });
-  
-                const target = usersResults.users.find(
-                  (user) => user.address == result.assignUserAddress
-                );
-                if (target) {
-                  result.iconUrl = target.iconUrl;
-                  result.name = target.userName;
-                } else {
-                  result.iconUrl = "";
-                  result.name = "";
-                }
-                return result;
-              }
-            })
-            .filter((assign) => assign.tasksIndexes.length > 0),
-        };
-  
-        let indexes = {};
-        assigns.users.forEach((item) => {
-          item.tasksIndexes.forEach((index) => {
-            if (!indexes[index]) {
-              indexes[index] = [];
+    const results = responseJson.results
+      .map((item) => {
+        try {
+          const id = item.id;
+          const guildId = item.properties.GuildId.rich_text[0].plain_text;
+          const channelId = item.properties.ChannelId.rich_text[0].plain_text;
+          const messageId =
+            item.properties.FirstMessageId.rich_text[0].plain_text;
+          const summary = item.properties.GPTSummary.rich_text[0].plain_text;
+          const tasks = JSON.parse(
+            item.properties.GPTTaskType.rich_text[0].plain_text
+          );
+          for (const task of tasks) {
+            task.checked = false;
+            if (
+              ![
+                "開発",
+                "デザイン",
+                "BizDev",
+                "コミュニティ",
+                "マーケティング",
+                "営業",
+              ].includes(task.type)
+            ) {
+              task.type = "その他";
             }
-            indexes[index] = [
-              ...indexes[index],
-              {
-                assignUserAddress: item.assignUserAddress,
-                iconUrl: item.iconUrl,
-                name: item.name,
-              },
-            ];
+          }
+
+          const skips = item.properties.skips.multi_select.map((skip) => {
+            return parseInt(skip.name);
           });
-        });
-  
-        assigns.indexes = indexes;
-  
-        let status = TaskStatus.active;
-        if (item.properties.Status.select?.name === "fixed") {
-          status = TaskStatus.fixed;
-        } else if (item.properties.Status.select?.name === "completed") {
-          status = TaskStatus.completed;
+          const assigns = {
+            users: item.properties.assigns.rollup.array
+              .map((data) => {
+                if (data.formula.string) {
+                  const result = JSON.parse(data.formula.string);
+
+                  result.tasksIndexes = result.tasksIndexes.filter((index) => {
+                    return !skips.includes(index);
+                  });
+
+                  const target = usersResults.users.find(
+                    (user) => user.address == result.assignUserAddress
+                  );
+                  if (target) {
+                    result.iconUrl = target.iconUrl;
+                    result.name = target.userName;
+                  } else {
+                    result.iconUrl = "";
+                    result.name = "";
+                  }
+                  return result;
+                }
+              })
+              .filter((assign) => assign.tasksIndexes.length > 0),
+          };
+
+          let indexes = {};
+          assigns.users.forEach((item) => {
+            item.tasksIndexes.forEach((index) => {
+              if (!indexes[index]) {
+                indexes[index] = [];
+              }
+              indexes[index] = [
+                ...indexes[index],
+                {
+                  assignUserAddress: item.assignUserAddress,
+                  iconUrl: item.iconUrl,
+                  name: item.name,
+                },
+              ];
+            });
+          });
+
+          assigns.indexes = indexes;
+
+          let status = TaskStatus.active;
+          if (item.properties.Status.select?.name === "fixed") {
+            status = TaskStatus.fixed;
+          } else if (item.properties.Status.select?.name === "completed") {
+            status = TaskStatus.completed;
+          }
+
+          // let tasks = [];
+          // const regx = /- \[ \] (.+)\n?/g;
+          // const matches = item.properties.tasks.rich_text[0].plain_text.match(regx);
+          // if (matches) {
+          //   for (const match of matches) {
+          //     tasks = [
+          //       ...tasks,
+          //       { name: match.replace("- [ ] ", ""), checked: false },
+          //     ];
+          //   }
+          // }
+
+          const date = new Date(
+            parseInt(item.properties.CreatedAt.rich_text[0].plain_text)
+          ).toLocaleString();
+          return {
+            id,
+            guildId,
+            channelId,
+            messageId,
+            date,
+            summary,
+            status,
+            tasks,
+            assigns,
+            skips,
+          };
+        } catch (e) {
+          //console.log(e.message)
         }
-  
-        // let tasks = [];
-        // const regx = /- \[ \] (.+)\n?/g;
-        // const matches = item.properties.tasks.rich_text[0].plain_text.match(regx);
-        // if (matches) {
-        //   for (const match of matches) {
-        //     tasks = [
-        //       ...tasks,
-        //       { name: match.replace("- [ ] ", ""), checked: false },
-        //     ];
-        //   }
-        // }
-  
-        const date = new Date(parseInt(item.properties.CreatedAt.rich_text[0].plain_text)).toLocaleString();
-        return {
-          id,
-          guildId,
-          channelId,
-          messageId,
-          date,
-          summary,
-          status,
-          tasks,
-          assigns,
-          skips,
-        };
-  
-      }catch(e){
-        //console.log(e.message)
-      }
-    }).filter(Boolean);
+      })
+      .filter(Boolean);
 
     return {
       tasks: results,
@@ -138,6 +159,10 @@ const getGuilds = async (guildId = "") => {
       `https://notionmanager.ukishima.repl.co/guild?id=${guildId}`,
       {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
         compress: true,
       }
     );
@@ -152,8 +177,13 @@ const getGuilds = async (guildId = "") => {
       const guildId = item.properties.guildId.title[0].plain_text;
       const guildName = item.properties.name.rich_text[0].plain_text;
       const iconUrl = item.properties.iconUrl.rich_text[0].plain_text;
-      const contract = JSON.parse(item.properties.contract.rich_text[0].plain_text);
-      return { id, guildId, guildName, iconUrl,contract };
+      const contract = JSON.parse(
+        item.properties.contract.rich_text[0].plain_text
+      );
+      const channels = JSON.parse(
+        item.properties.channels.rich_text[0].plain_text
+      );
+      return { id, guildId, guildName, iconUrl, contract, channels };
     });
     return {
       guilds: results,
@@ -161,7 +191,7 @@ const getGuilds = async (guildId = "") => {
       nextCursor: responseJson.next_cursor,
     };
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return [];
   }
 };
@@ -172,6 +202,10 @@ const getUsers = async (address = "") => {
       `https://notionmanager.ukishima.repl.co/user?address=${address}`,
       {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
         compress: true,
       }
     );
@@ -181,17 +215,19 @@ const getUsers = async (address = "") => {
     }
 
     const responseJson = await response.json();
-    const results = responseJson.results.map((item) => {
-      try{
-        const id = item.id;
-        const address = item.properties.walletAddress.title[0].plain_text;
-        const userName = item.properties.userName.rich_text[0].plain_text;
-        const iconUrl = item.properties.iconUrl.rich_text[0].plain_text;
-        return { id, address, userName, iconUrl };  
-      }catch(error){
-        console.error(item,error)
-      }
-    }).filter(Boolean);
+    const results = responseJson.results
+      .map((item) => {
+        try {
+          const id = item.id;
+          const address = item.properties.walletAddress.title[0].plain_text;
+          const userName = item.properties.userName.rich_text[0].plain_text;
+          const iconUrl = item.properties.iconUrl.rich_text[0].plain_text;
+          return { id, address, userName, iconUrl };
+        } catch (error) {
+          console.error(item, error);
+        }
+      })
+      .filter(Boolean);
     return {
       users: results,
       hasMore: responseJson.has_more,
@@ -223,6 +259,7 @@ const addAssign = async (address, taskItem) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
         },
         compress: true,
         body: JSON.stringify(requestData),
@@ -247,6 +284,10 @@ const getAssign = async (address) => {
       `https://notionmanager.ukishima.repl.co/getAssign?address=${address}`,
       {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
         compress: true,
       }
     );
@@ -285,6 +326,10 @@ const mintAssignToken = async (address, taskItem) => {
       `https://notionmanager.ukishima.repl.co/getAssign?id=${taskItem.id}`,
       {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
         compress: true,
       }
     );
@@ -360,11 +405,14 @@ const mintAssignToken = async (address, taskItem) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
       },
+      compress: true,
       body: JSON.stringify(requestData),
     };
     const mintResponse = await fetch(
-      "https://a5guh723j5wcy2ns7vopdfjcu40qukfn.lambda-url.ap-northeast-1.on.aws/",
+      "https://3emm6xaoyufyll6xdmocaxmrou0ogrfi.lambda-url.ap-northeast-1.on.aws/",
+      //"https://a5guh723j5wcy2ns7vopdfjcu40qukfn.lambda-url.ap-northeast-1.on.aws/",
       options
     );
 
@@ -437,11 +485,14 @@ const mintCompletionToken = async (address, taskItem) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
       },
+      compress: true,
       body: JSON.stringify(requestData),
     };
     const mintResponse = await fetch(
-      "https://a5guh723j5wcy2ns7vopdfjcu40qukfn.lambda-url.ap-northeast-1.on.aws/",
+      "https://3emm6xaoyufyll6xdmocaxmrou0ogrfi.lambda-url.ap-northeast-1.on.aws/",
+      //"https://a5guh723j5wcy2ns7vopdfjcu40qukfn.lambda-url.ap-northeast-1.on.aws/",
       options
     );
 
@@ -469,6 +520,7 @@ const updateStatus = async (taskItem, status, skips) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
         },
         compress: true,
         body: JSON.stringify(requestData),
