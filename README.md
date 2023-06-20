@@ -41,7 +41,6 @@ Discord Bot招待リンク： https://discord.com/api/oauth2/authorize?client_id
 
 [![動画](https://imgur.com/de90339a-84f8-4b9a-a0e6-9c2dd7198246)](https://youtu.be/V6bapKpFG_4)
 
-
 ## プロダクト概要
 
 DAOやコミュニティにおけるチャットログは膨大で、全てをキャッチアップすることは不可能です。
