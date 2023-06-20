@@ -1,4 +1,4 @@
-# Taskal for AI Crypto Hackathon
+![タスクの属性判定](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/c52b060f-1e97-4af1-b33e-a018b65adf30)# Taskal for AI Crypto Hackathon
 
 **〜AIでチャットログからタスクを抽出、ブロックチェーンで「助け合い」を可視化〜**
 
@@ -60,8 +60,7 @@ Discord上で稼働するBotをサーバーに招待することで、テキス�
 ![タスクの属性判定](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/50d7da9d-ff26-47d3-802f-dccd9ca2df5f)
 
 タスクの属性もAIで判定しており、自分が担当したい分野のタスクを簡単に探すことが可能です。
-
-!https://media.discordapp.net/attachments/1116624090241974364/1120614535322153051/1385cd4c391c4375.gif?width=1298&height=702
+![Uploading トークンゲート編集後.gif…]()
 
 要約一覧ページの閲覧権限をコミュニティごとに制御することもできます。ウォレット接続時に特定のトークンを持っているかどうかを判定し、あるトークンを持っていれば自分たちのコミュニティのページを閲覧可能にする、という制限が可能です。
 ![test8](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/6de4ac22-0b21-4da1-a813-68826053e41c)
