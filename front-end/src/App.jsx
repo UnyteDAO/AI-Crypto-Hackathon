@@ -427,7 +427,7 @@ const App = () => {
                                 />
                                 {section.id == "Guild" ||
                                 section.id == "Channel" ? (
-                                  <div className="flex ml-1 w-8 items-center justify-start">
+                                  <div className="flex ml-1 w-5 items-center justify-start">
                                     <div className="h-4 w-4 ml-1">
                                       <img src={option.icon}></img>
                                     </div>
@@ -435,7 +435,7 @@ const App = () => {
                                 ) : null}
                                 <label
                                   htmlFor={`filter-${section.id}-${optionIdx}`}
-                                  className="ml-2 text-sm text-gray-600 justify-start"
+                                  className="ml-1 text-sm text-gray-600 justify-start"
                                 >
                                   {option.label}
                                 </label>
