@@ -23,6 +23,7 @@ const defaultTaskItem = {
   id: "",
   guildId: "",
   channel: "",
+  channelName: "",
   messageId: "",
   summary: "",
   tasks: [],
@@ -298,7 +299,7 @@ const TaskItem = (props) => {
       <div className="flex flex-1 flex-col p-4">
         <div className="flex justify-between">
           <div className="sr-only">Channel</div>
-          <div className="flex text-sm text-gray-500">{taskItem.channel}</div>
+          <div className="flex text-sm text-gray-500">{taskItem.channelName}</div>
           {/* <div className="flex text-sm text-gray-500">{taskItem.guildId}</div> */}
           <div className="sr-only">Date</div>
           <div className="flex text-sm text-gray-500">
