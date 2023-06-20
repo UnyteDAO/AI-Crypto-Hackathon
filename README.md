@@ -53,30 +53,24 @@ DAOに貢献したいと考えていても
 ## ⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬
 ![Screenshot 2023-06-20 at 1 24 49](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/bbbd7238-4353-432a-90c5-9c6b691a63ff)
 Discord上で稼働するBotをサーバーに招待することで、テキストログが解析され会話内容ごとに自動で要約が生成されます。要約にはgpt-3.5を利用しています。
-
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/2d9eb47a-1928-4688-b917-82708aca68c5/Untitled.png)
+![Taskalフロント](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/1ee3b525-b68e-43bd-9427-5905d8fd67bc)
 
 要約データはTaskalのwebサイト上で閲覧可能です。
 また、要約データごとにチームとして取り組むべきタスクが自動で生成されます。
-
-![タスクの属性判定.gif](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/594f80e7-e4d0-4f94-aad8-a6746c5e4bb9/%E3%82%BF%E3%82%B9%E3%82%AF%E3%81%AE%E5%B1%9E%E6%80%A7%E5%88%A4%E5%AE%9A.gif)
+![タスクの属性判定](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/50d7da9d-ff26-47d3-802f-dccd9ca2df5f)
 
 タスクの属性もAIで判定しており、自分が担当したい分野のタスクを簡単に探すことが可能です。
 
 !https://media.discordapp.net/attachments/1116624090241974364/1120614535322153051/1385cd4c391c4375.gif?width=1298&height=702
 
 要約一覧ページの閲覧権限をコミュニティごとに制御することもできます。ウォレット接続時に特定のトークンを持っているかどうかを判定し、あるトークンを持っていれば自分たちのコミュニティのページを閲覧可能にする、という制限が可能です。
-
-![test8.gif](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/4cf271fb-c35f-4d3d-9301-aa732f9bb3f5/test8.gif)
-
+![test8](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/6de4ac22-0b21-4da1-a813-68826053e41c)
 ユーザーはログイン後、好きなタスクを選んで「やります！」という意思表示ができます。
+![タスク担当チェック](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/80e3d7a2-ef1e-42b7-abfd-569eedf7d05d)
 
 タスク完了時には、サーバー管理者から該当するユーザーにお礼を送ることができ、「タスク実行の意思表示」「実行完了」それぞれのアクションが記録された際、自動でNFTを発行する機能を備えています。
-
-![お願い！.gif](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d1f52c18-fca5-4341-860f-85d30deb39ab/%E3%81%8A%E9%A1%98%E3%81%84%EF%BC%81.gif)
-
-![ありがとう！.gif](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/9b8b7129-2cb0-4862-bc81-c50dde119913/%E3%81%82%E3%82%8A%E3%81%8B%E3%82%99%E3%81%A8%E3%81%86%EF%BC%81.gif)
-
+![ありがとう！](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/7f29f16c-8fc6-4dad-985b-b49c268179d4)
+![お願い！](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/42a96773-1daf-409a-a845-cfc7f29923cf)
 これにより、どのユーザーがどんなコミュニティでどれくらい貢献してきたのかというデータをブロックチェーン上に保存することができ、ユーザーの経歴も簡単に証明することが可能になります。
 
 ## 概要動画
