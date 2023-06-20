@@ -9,6 +9,8 @@ Discord Bot招待リンク： https://discord.com/api/oauth2/authorize?client_id
 
 スライド：https://docs.google.com/presentation/d/1vMPAK55h5T4BDjJAiGHF7Y96Ua9umWu9jwQdR2S19-c/edit?usp=sharing
 
+ドキュメント：https://unyte.notion.site/WTF-is-Taskal-f0eb4b3c4b9f4a44bdd33bf96e2dcc8a?pvs=4
+
 ## テーマの背景
 
 2023年は第4次AIブームの始まりともいえる年となり、人の指示や質問に応じて文章や画像などを作ることができるChatGPT等の生成AIは大きく技術的な発展を遂げています。
