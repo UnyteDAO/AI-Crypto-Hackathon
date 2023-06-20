@@ -66,7 +66,7 @@ const CompleteTasks = (props) => {
     const result = await mintCompletionToken(address, mintTaskItem);
     if (result.txHash) {
       console.log(
-        `explorer: https://mumbai.polygonscan.com/tx/${result.txHash}`
+        `explorer: https://astar.subscan.io/extrinsic/${result.txHash}`
       );
     }
 

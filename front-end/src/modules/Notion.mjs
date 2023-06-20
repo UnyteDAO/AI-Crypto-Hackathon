@@ -34,7 +34,7 @@ const getTasks = async (nextCursor = "") => {
           const channelId = item.properties.ChannelId.rich_text[0].plain_text;
           const messageId =
             item.properties.FirstMessageId.rich_text[0].plain_text;
-          const summary = item.properties.GPTSummary.rich_text[0].plain_text;
+          const summary = item.properties.Summary.rich_text[0].plain_text;
           const tasks = JSON.parse(
             item.properties.GPTTaskType.rich_text[0].plain_text
           );
