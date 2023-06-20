@@ -1,6 +1,9 @@
 # Taskal for AI Crypto Hackathon
 **〜AIでチャットログからタスクを抽出、ブロックチェーンで「助け合い」を可視化〜**
 
+[## Live demo]([url](https://unytedao.github.io/AI-Crypto-Hackathon/))
+Discord Bot招待リンク： https://discord.com/api/oauth2/authorize?client_id=1118547611893370970&permissions=8&scope=bot
+
 ## テーマの背景
 
 2023年は第4次AIブームの始まりともいえる年となり、人の指示や質問に応じて文章や画像などを作ることができるChatGPT等の生成AIは大きく技術的な発展を遂げています。
