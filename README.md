@@ -85,9 +85,9 @@ https://camo.githubusercontent.com/255c14c5d5f2ce539ea81ee5fd9d2c9c872fcbfffe037
 | Category | Name |
 | --- | --- |
 | Protocol | Astar Network |
-| Infrastructure | Notion |
-| Language | Html、CSS、Javascript、wasm（C＋＋）、Webpack、Solidity |
-| Web2-Web3 Bridge | ethers.js |
+| Infrastructure | openAI(chatGPT3.5turbo)、AWS、Notion |
+| Language | Html、Javascript、React、TailwindCSS、Vite、Solidity |
+| Web2-Web3 Bridge | ethers.js、wagmi |
 
 ## Blockchain
 
