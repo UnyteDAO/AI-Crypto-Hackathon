@@ -4,6 +4,7 @@
 ## 各種リンク
 
 Live demo: https://unytedao.github.io/AI-Crypto-Hackathon/ 
+
 ※現状、デモを触っていただくためにトークンゲート機能/Adminのみ実行できる処理を一時的に解放しています。
 
 Discord Bot招待リンク： https://discord.com/api/oauth2/authorize?client_id=1118547611893370970&permissions=8&scope=bot
