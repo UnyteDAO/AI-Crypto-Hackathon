@@ -78,11 +78,11 @@ Discord上で稼働するBotをサーバーに招待することで、テキス�
 
 ## 概要動画
 
-https://camo.githubusercontent.com/255c14c5d5f2ce539ea81ee5fd9d2c9c872fcbfffe037a4390d6905284fe71bb/68747470733a2f2f692e7974696d672e636f6d2f76692f465359664e3838416271672f6d617872657364656661756c742e6a7067
+https://youtu.be/V6bapKpFG_4
 
 ## アーキテクチャー
 
-![architecture.svg](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/b0e5a215-4ab4-4868-8769-cad64fbc975d/architecture.svg)
+![test drawio](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/c991638c-d4a4-4acc-b3c5-b22250f74946)
 
 !https://github.com/ukishima/EOA-Crypt-For-Tokyo-Web3-Hackathon/raw/main/docs/overview/pic_architecture.jpg
 
@@ -107,7 +107,7 @@ https://github.com/UnyteDAO/AI-Crypto-Hackathon
 
 [Subscan | Aggregate Substrate ecological network high-precision Web3 explorer](https://astar.subscan.io/account/0x2388491c52f05979ecdd5a4b0361a7be9c4f7334)
 
-## Product Page（demo） * Hosted on IPFS
+## Product Page（demo）
 
 - β版リンク
     
@@ -117,11 +117,10 @@ https://github.com/UnyteDAO/AI-Crypto-Hackathon
     
     [Bluez](https://bluez.app/asset_detail?id=648d98a0d2e6b44ac93824cb)
     
-    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/afa07cec-527a-492e-a496-9c73ec14ec46/Untitled.png)
-    
+    ![image](https://github.com/UnyteDAO/AI-Crypto-Hackathon/assets/40339533/9a153933-5dcd-4162-8413-d9a6f45cf0f5)
 
-## Help Page
-
-https://ukishima.github.io/EOA-Crypt-For-Tokyo-Web3-Hackathon/docs/
+  
 
 ## Pitch Slide Page
+https://docs.google.com/presentation/d/1vMPAK55h5T4BDjJAiGHF7Y96Ua9umWu9jwQdR2S19-c/edit?usp=sharing
+
