@@ -49,11 +49,8 @@ DAOに貢献したいと考えていても
 という作業をこなすことができず、結果ますます参加しにくくなってしまうという状況が発生しています。DAOにとっても、貢献してほしいと思っているもののどんなタスクを誰に渡せば良いか分からず、結果運営メンバーのみでなんとか仕事を回している、ということも少なくありません。
 
 私たちはコミュニティにおけるチャット履歴を要約し、タスクを抽出できる「Taskal」を開発しました。
-
-![test11.gif](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/3bcd6d47-e9c3-424f-a41f-2a7cf31859f3/test11.gif)
-
+[https://media.discordapp.net/attachments/1116624090241974364/1120554385861267486/test11.gif?width=1242&height=702](チャットログ)
 ## ⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬⏬
-
 ![Screenshot 2023-06-20 at 1.24.49.jpg](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/15fbdd96-0c60-4d20-9aa0-21255737c587/Screenshot_2023-06-20_at_1.24.49.jpg)
 
 Discord上で稼働するBotをサーバーに招待することで、テキストログが解析され会話内容ごとに自動で要約が生成されます。要約にはgpt-3.5を利用しています。
